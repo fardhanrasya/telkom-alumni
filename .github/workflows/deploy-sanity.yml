@@ -1,0 +1,42 @@
+name: Deploy Sanity Studio
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'studio-telkom/**'  # Hanya trigger saat ada perubahan di folder studio
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'studio-telkom/**'
+  workflow_dispatch:  # Memungkinkan trigger manual dari GitHub UI
+
+jobs:
+  deploy-studio:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      working-directory: ./studio-telkom
+      run: npm ci
+    
+    - name: Deploy Sanity Studio
+      working-directory: ./studio-telkom
+      run: npx sanity@latest deploy
+      env:
+        SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+        SANITY_STUDIO_HOSTNAME: ${{ vars.SANITY_STUDIO_HOSTNAME || 'localhost:3333' }}
