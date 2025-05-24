@@ -24,21 +24,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'pnpm'
-        cache-dependency-path: 'studio-telkom/pnpm-lock.yaml'
-    
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
         version: 8.x
         run_install: false
     
-    - name: Install pnpm
-      run: npm install -g pnpm@8.x
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'pnpm'
+        cache-dependency-path: 'studio-telkom/pnpm-lock.yaml'
     
     - name: Install dependencies
       working-directory: ./studio-telkom
