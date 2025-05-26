@@ -3,8 +3,14 @@
 import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { type SanityDocument } from 'next-sanity';
+import { urlFor } from '@/sanity/utils';
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  alumni?: SanityDocument[];
+}
+
+const HeroSection = ({ alumni = [] }: HeroSectionProps) => {
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,20 +36,10 @@ const HeroSection = () => {
             </div>
             <div className="mt-8 flex items-center space-x-6">
               <div className="flex items-center">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-white"
-                    >
-                      <Image
-                        src={`/avatar-${i}.jpg`}
-                        alt={`Alumni ${i}`}
-                        className="object-cover"
-                        fill
-                      />
-                    </div>
-                  ))}
+                <div className="flex items-center justify-center rounded-full bg-primary/10 h-10 w-10">
+                  <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">2000+ Alumni</p>
