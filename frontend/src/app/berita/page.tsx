@@ -66,7 +66,7 @@ export default async function BeritaPage() {
                     </p>
                   </div>
                   <Link
-                    href={`/${posts[0].slug.current}`}
+                    href={`/berita/${posts[0].slug.current}`}
                     className="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary hover:bg-primary-700 transition-colors duration-200"
                   >
                     Baca Selengkapnya

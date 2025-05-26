@@ -21,8 +21,8 @@ const HeroSection = () => {
               </p>
             </div>
             <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-              <Button href="/daftar" size="lg">
-                Bergabung Sekarang
+              <Button href="/karir" size="lg">
+                Lihat Lowongan
               </Button>
               <Button href="/alumni" variant="outline" size="lg">
                 Lihat Direktori Alumni

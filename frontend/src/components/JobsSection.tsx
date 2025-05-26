@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { type SanityDocument } from 'next-sanity';
+import { urlFor } from '@/sanity/utils';
 
 interface JobsSectionProps {
   jobs: SanityDocument[];
@@ -68,7 +69,7 @@ const JobsSection: React.FC<JobsSectionProps> = ({ jobs }) => {
                       <div className="relative h-12 w-12 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center">
                         {job.company?.logo ? (
                           <Image
-                            src={job.company.logo.asset.url}
+                            src={urlFor(job.company.logo)?.url() || ''}
                             alt={job.company.name}
                             className="object-contain"
                             fill

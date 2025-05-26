@@ -79,7 +79,7 @@ export default async function PostPage({
               {relatedPosts.map((relatedPost) => (
                 <Link 
                   key={relatedPost._id} 
-                  href={`/${relatedPost.slug.current}`} 
+                  href={`/berita/${relatedPost.slug.current}`} 
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
                 >
                   <div className="relative h-40 w-full">
