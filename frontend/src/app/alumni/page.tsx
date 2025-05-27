@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import AlumniCard, { Alumni } from '@/components/AlumniCard';
 import AlumniCardSkeleton from '@/components/AlumniCardSkeleton';
 import Pagination from '@/components/Pagination';
+import Image from 'next/image';
 // Menggunakan API route lokal untuk menghindari masalah CORS
 
 // Filter options
@@ -138,14 +139,46 @@ const AlumniPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Direktori Alumni</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="relative h-[50vh] w-full overflow-hidden">
+        <div className="absolute inset-0">
+          <Image 
+            src="/alumni-hero.jpg" 
+            alt="Alumni SMK Telkom Jakarta" 
+            fill 
+            priority
+            className="object-cover object-center brightness-[0.7]" 
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70" />
+        <div className="relative flex h-full flex-col items-center justify-center px-4 text-center">
+          <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+            Direktori Alumni
+          </h1>
+          <p className="mx-auto max-w-2xl text-lg text-white/90 md:text-xl">
             Temukan dan terhubung dengan alumni SMK Telkom Jakarta dari berbagai angkatan
           </p>
+          <div className="mt-8 animate-bounce">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-8 w-8 text-white" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+              />
+            </svg>
+          </div>
         </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
 
         {/* Filter dan Pencarian */}
         <div className="mb-10 overflow-hidden rounded-xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50">
@@ -250,14 +283,14 @@ const AlumniPage = () => {
         {/* Grid Alumni */}
         {loading ? (
           // Skeleton saat loading
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(itemsPerPage)].map((_, index) => (
               <AlumniCardSkeleton key={index} />
             ))}
           </div>
         ) : alumni.length > 0 ? (
           // Tampilkan alumni jika ada
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {alumni.map((alumni) => (
               <AlumniCard key={alumni._id} alumni={alumni} />
             ))}
