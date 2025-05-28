@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Metadata } from 'next';
+import Head from 'next/head';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import AlumniCard, { Alumni } from '@/components/AlumniCard';
 import AlumniCardSkeleton from '@/components/AlumniCardSkeleton';
@@ -21,17 +24,26 @@ const majorLabels: Record<string, string> = {
 const graduationYears = ['Semua', '2005-2009', '2010-2015', '2016-2020', '2021-Sekarang'];
 
 const AlumniPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Ambil parameter dari URL
+  const pageParam = searchParams.get('page');
+  const searchParam = searchParams.get('search');
+  const majorParam = searchParams.get('major');
+  const yearParam = searchParams.get('year');
+  
   const [alumni, setAlumni] = useState<Alumni[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam) : 1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage] = useState(8); // Jumlah item per halaman
+  const [itemsPerPage] = useState(9); // Jumlah item per halaman
 
   // State untuk filter
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMajor, setSelectedMajor] = useState('Semua');
-  const [selectedYear, setSelectedYear] = useState('Semua');
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [selectedMajor, setSelectedMajor] = useState(majorParam || 'Semua');
+  const [selectedYear, setSelectedYear] = useState(yearParam || 'Semua');
   const [isSearching, setIsSearching] = useState(false);
   
   // State untuk query terakhir yang digunakan
@@ -40,7 +52,12 @@ const AlumniPage = () => {
     major: string;
     yearRange: string;
     page: number;
-  }>({ searchTerm: '', major: 'Semua', yearRange: 'Semua', page: 1 });
+  }>({ 
+    searchTerm: searchParam || '', 
+    major: majorParam || 'Semua', 
+    yearRange: yearParam || 'Semua', 
+    page: pageParam ? parseInt(pageParam) : 1 
+  });
 
   // Fungsi untuk mengambil data alumni menggunakan API route lokal
   const fetchAlumni = async (page: number, filters: { searchTerm?: string; major?: string; yearRange?: string; }) => {
@@ -92,20 +109,64 @@ const AlumniPage = () => {
     }
   };
 
-  // Pertama kali komponen di-mount, ambil data alumni
+  // Fungsi untuk memperbarui URL dengan parameter filter dan halaman
+  const updateURLWithFilters = (filters: { page: number; search?: string; major?: string; year?: string }) => {
+    const params = new URLSearchParams();
+    
+    if (filters.page && filters.page > 1) {
+      params.set('page', filters.page.toString());
+    }
+    
+    if (filters.search && filters.search.trim() !== '') {
+      params.set('search', filters.search);
+    }
+    
+    if (filters.major && filters.major !== 'Semua') {
+      params.set('major', filters.major);
+    }
+    
+    if (filters.year && filters.year !== 'Semua') {
+      params.set('year', filters.year);
+    }
+    
+    const queryString = params.toString();
+    const url = `/alumni${queryString ? `?${queryString}` : ''}`;
+    
+    // Gunakan router.replace untuk memperbarui URL tanpa reload halaman
+    router.replace(url, { scroll: false });
+  };
+
+  // Pertama kali komponen di-mount atau ketika URL berubah, ambil data alumni
   useEffect(() => {
-    console.log('Komponen di-mount, mengambil data alumni...');
-    fetchAlumni(currentPage, { searchTerm: '', major: 'Semua', yearRange: 'Semua' });
-  }, []);
+    console.log('Komponen di-mount atau URL berubah, mengambil data alumni...');
+    fetchAlumni(
+      pageParam ? parseInt(pageParam) : 1,
+      { 
+        searchTerm: searchParam || '', 
+        major: majorParam || 'Semua', 
+        yearRange: yearParam || 'Semua' 
+      }
+    );
+  }, [pageParam, searchParam, majorParam, yearParam]);
 
   // Handler untuk mengubah halaman
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    
+    // Perbarui URL dengan parameter halaman yang baru
+    updateURLWithFilters({
+      page, 
+      search: lastQuery.searchTerm,
+      major: lastQuery.major !== 'Semua' ? lastQuery.major : undefined,
+      year: lastQuery.yearRange !== 'Semua' ? lastQuery.yearRange : undefined
+    });
+    
     fetchAlumni(page, { 
       searchTerm: lastQuery.searchTerm, 
       major: lastQuery.major, 
       yearRange: lastQuery.yearRange 
     });
+    
     // Scroll ke atas halaman saat mengganti halaman
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -115,17 +176,24 @@ const AlumniPage = () => {
     setIsSearching(true);
     setCurrentPage(1); // Reset ke halaman 1 saat melakukan pencarian baru
     
-    // Log untuk debugging
-    console.log('Melakukan pencarian dengan filter:', {
+    // Perbarui URL dengan parameter pencarian
+    updateURLWithFilters({
+      page: 1,
+      search: searchTerm,
+      major: selectedMajor !== 'Semua' ? selectedMajor : undefined,
+      year: selectedYear !== 'Semua' ? selectedYear : undefined
+    });
+    
+    // Jalankan pencarian dengan filter yang dipilih
+    fetchAlumni(1, {
       searchTerm,
       major: selectedMajor,
       yearRange: selectedYear
     });
     
-    fetchAlumni(1, { searchTerm, major: selectedMajor, yearRange: selectedYear })
-      .finally(() => {
-        setIsSearching(false);
-      });
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 500); // Delay untuk UI feedback
   };
 
   // Handler untuk reset filter
@@ -134,8 +202,16 @@ const AlumniPage = () => {
     setSelectedMajor('Semua');
     setSelectedYear('Semua');
     setCurrentPage(1);
-    console.log('Mereset filter dan mengambil semua alumni');
-    fetchAlumni(1, { searchTerm: '', major: 'Semua', yearRange: 'Semua' });
+    
+    // Perbarui URL untuk menghapus semua parameter
+    router.replace('/alumni', { scroll: false });
+    
+    // Jalankan pencarian dengan filter direset
+    fetchAlumni(1, {
+      searchTerm: '',
+      major: 'Semua',
+      yearRange: 'Semua'
+    });
   };
 
   return (
@@ -193,7 +269,7 @@ const AlumniPage = () => {
                   type="text"
                   name="search"
                   id="search"
-                  className="block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm text-gray-800 placeholder-gray-500 focus:border-primary focus:ring-primary sm:text-sm"
                   placeholder="Nama, jabatan, atau perusahaan"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -210,7 +286,7 @@ const AlumniPage = () => {
               <select
                 id="major"
                 name="major"
-                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm text-gray-800 focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
                 value={selectedMajor}
                 onChange={(e) => setSelectedMajor(e.target.value)}
               >
@@ -230,7 +306,7 @@ const AlumniPage = () => {
               <select
                 id="year"
                 name="year"
-                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm text-gray-800 focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
               >
@@ -305,11 +381,38 @@ const AlumniPage = () => {
 
         {/* Pagination */}
         {totalPages > 1 && !loading && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <>
+            {/* SEO Metadata untuk Paginasi */}
+            <Head>
+              {currentPage > 1 && (
+                <link
+                  rel="prev"
+                  href={`/alumni?${new URLSearchParams({
+                    ...(lastQuery.searchTerm ? { search: lastQuery.searchTerm } : {}),
+                    ...(lastQuery.major !== 'Semua' ? { major: lastQuery.major } : {}),
+                    ...(lastQuery.yearRange !== 'Semua' ? { year: lastQuery.yearRange } : {}),
+                    page: (currentPage - 1).toString(),
+                  }).toString()}`}
+                />
+              )}
+              {currentPage < totalPages && (
+                <link
+                  rel="next"
+                  href={`/alumni?${new URLSearchParams({
+                    ...(lastQuery.searchTerm ? { search: lastQuery.searchTerm } : {}),
+                    ...(lastQuery.major !== 'Semua' ? { major: lastQuery.major } : {}),
+                    ...(lastQuery.yearRange !== 'Semua' ? { year: lastQuery.yearRange } : {}),
+                    page: (currentPage + 1).toString(),
+                  }).toString()}`}
+                />
+              )}
+            </Head>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </div>
