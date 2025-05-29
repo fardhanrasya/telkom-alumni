@@ -1,4 +1,4 @@
-import { PortableText } from "@portabletext/react";
+import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { type SanityDocument } from "next-sanity";
 import { client } from "@/sanity/client";
 import Link from "next/link";
@@ -42,6 +42,99 @@ function calculateReadTime(content: any[]) {
   
   return readTimeMinutes;
 }
+
+// Konfigurasi komponen untuk PortableText
+const portableTextComponents: PortableTextComponents = {
+  types: {
+    image: ({ value }) => {
+      // Periksa apakah asset ada dan memiliki _ref
+      if (!value || !value.asset || !value.asset._ref) {
+        console.log('Missing image asset reference', value);
+        return null;
+      }
+
+      // Buat URL gambar dari _ref menggunakan format URL Sanity
+      // Format: https://cdn.sanity.io/images/{projectId}/{dataset}/{imageId}-{dimensions}.{format}
+      const imageRef = value.asset._ref;
+      // Contoh _ref: image-fec5144cee6cfc77c47fe8af247ea8be63c9e3c0-432x576-jpg
+      
+      // Parse referensi gambar dengan lebih baik
+      // Format referensi: image-{id}-{dimensions}-{format}
+      const refParts = imageRef.split('-');
+      
+      // Pastikan ini adalah referensi gambar
+      if (refParts[0] !== 'image') {
+        console.log('Not an image reference', imageRef);
+        return null;
+      }
+      
+      // Ambil format dari bagian terakhir (jpg, png, dll)
+      const format = refParts[refParts.length - 1];
+      
+      // Ambil dimensi dari bagian kedua terakhir (misal: 432x576)
+      const dimensions = refParts[refParts.length - 2];
+      
+      // Ambil ID gambar (semua bagian di tengah)
+      const id = refParts.slice(1, refParts.length - 2).join('-');
+      
+      // Gunakan projectId dan dataset dari konfigurasi client Sanity
+      const { projectId, dataset } = client.config();
+      const imageUrl = `https://cdn.sanity.io/images/${projectId}/${dataset}/${id}-${dimensions}.${format}`;
+
+      return (
+        <div className="my-8 relative rounded-lg overflow-hidden shadow-md">
+          <div className="relative aspect-video">
+            <Image
+              src={imageUrl}
+              alt={value.alt || 'Gambar berita'}
+              fill
+              className="object-cover"
+            />
+          </div>
+          {value.caption && (
+            <div className="bg-gray-100 p-3 text-sm text-gray-700 italic text-center">
+              {value.caption}
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  block: {
+    h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-2xl font-bold mt-6 mb-3 text-gray-900">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-xl font-bold mt-5 mb-2 text-gray-900">{children}</h3>,
+    h4: ({ children }) => <h4 className="text-lg font-bold mt-4 mb-2 text-gray-900">{children}</h4>,
+    normal: ({ children }) => <p className="text-base mb-4 text-gray-700 leading-relaxed">{children}</p>,
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-gray-700 py-2">
+        {children}
+      </blockquote>
+    ),
+  },
+  list: {
+    bullet: ({ children }) => <ul className="list-disc pl-6 mb-6 space-y-2 text-gray-700">{children}</ul>,
+    number: ({ children }) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-gray-700">{children}</ol>,
+  },
+  listItem: {
+    bullet: ({ children }) => <li className="leading-relaxed">{children}</li>,
+    number: ({ children }) => <li className="leading-relaxed">{children}</li>,
+  },
+  marks: {
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }) => <em className="italic">{children}</em>,
+    link: ({ children, value }) => (
+      <a 
+        href={value.href} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-primary hover:underline font-medium"
+      >
+        {children}
+      </a>
+    ),
+  },
+};
 
 export default async function NewsDetailPage({
   params,
@@ -153,7 +246,7 @@ export default async function NewsDetailPage({
             
             {/* Konten Artikel */}
             <article className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
-              {Array.isArray(news.body) && <PortableText value={news.body} />}
+              {Array.isArray(news.body) && <PortableText value={news.body} components={portableTextComponents} />}
             </article>
             
             {/* Tanggal Update */}
