@@ -1,101 +1,184 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { PortableText } from '@portabletext/react';
 import { Button } from '@/components/ui/Button';
+import Pagination from '@/components/Pagination';
+import { formatDate, formatTime } from '@/lib/utils';
 
-// Contoh data acara
-const eventData = [
-  {
-    id: '1',
-    title: 'Reuni Akbar Alumni 2024',
-    date: '24 Juni 2024',
-    startTime: '10:00',
-    endTime: '16:00',
-    location: 'Aula SMK Telkom Jakarta',
-    isVirtual: false,
-    image: '/event-1.jpg',
-    description: 'Reuni akbar seluruh alumni SMK Telkom Jakarta dari berbagai angkatan. Acara ini akan diisi dengan berbagai kegiatan seru, mulai dari sharing session, workshop, hingga hiburan.',
-    slug: 'reuni-akbar-alumni-2024',
-  },
-  {
-    id: '2',
-    title: 'Workshop Kewirausahaan Digital',
-    date: '15 Juli 2024',
-    startTime: '13:00',
-    endTime: '17:00',
-    location: 'Online via Zoom',
-    isVirtual: true,
-    image: '/event-2.jpg',
-    description: 'Workshop online tentang bagaimana memulai dan mengembangkan bisnis digital di era industri 4.0. Dibawakan oleh alumni sukses yang telah membangun startup.',
-    slug: 'workshop-kewirausahaan-digital',
-  },
-  {
-    id: '3',
-    title: 'Career Talk: Peluang di Industri IT',
-    date: '28 Juli 2024',
-    startTime: '14:00',
-    endTime: '16:00',
-    location: 'Online via Zoom',
-    isVirtual: true,
-    image: '/event-3.jpg',
-    description: 'Diskusi tentang peluang karir di industri IT dengan pembicara dari perusahaan teknologi terkemuka seperti Tokopedia, Gojek, dan Traveloka.',
-    slug: 'career-talk-peluang-industri-it',
-  },
-  {
-    id: '4',
-    title: 'Networking Night: Alumni & Industri',
-    date: '10 Agustus 2024',
-    startTime: '18:00',
-    endTime: '21:00',
-    location: 'Hotel Borobudur Jakarta',
-    isVirtual: false,
-    image: '/event-4.jpg',
-    description: 'Malam networking untuk mempertemukan alumni dengan perwakilan industri. Kesempatan untuk memperluas jaringan profesional dan mencari peluang kolaborasi.',
-    slug: 'networking-night-alumni-industri',
-  },
-  {
-    id: '5',
-    title: 'Seminar Teknologi: AI & Machine Learning',
-    date: '25 Agustus 2024',
-    startTime: '09:00',
-    endTime: '12:00',
-    location: 'Aula SMK Telkom Jakarta',
-    isVirtual: false,
-    image: '/event-5.jpg',
-    description: 'Seminar tentang perkembangan terkini dalam bidang Kecerdasan Buatan dan Machine Learning. Dibawakan oleh pakar AI dari kalangan alumni.',
-    slug: 'seminar-teknologi-ai-machine-learning',
-  },
-  {
-    id: '6',
-    title: 'Mentoring Session: Persiapan Memasuki Dunia Kerja',
-    date: '5 September 2024',
-    startTime: '15:00',
-    endTime: '17:00',
-    location: 'Online via Microsoft Teams',
-    isVirtual: true,
-    image: '/event-6.jpg',
-    description: 'Sesi mentoring untuk para alumni baru yang akan memasuki dunia kerja. Berisi tips interview, pembuatan CV, dan pengembangan soft skill.',
-    slug: 'mentoring-session-persiapan-dunia-kerja',
-  },
-];
+// Interface untuk data acara
+interface LocationObject {
+  name: string;
+  address?: string;
+  city?: string;
+  mapLink?: string;
+}
+
+interface Speaker {
+  name: string;
+  title?: string;
+  company?: string;
+  image?: {
+    asset?: {
+      _ref: string;
+    };
+  };
+}
+
+interface Event {
+  _id: string;
+  title: string;
+  slug: {
+    current: string;
+  };
+  startDate: string;
+  endDate?: string;
+  location: string | LocationObject;
+  isVirtual: boolean;
+  virtualLink?: string;
+  imageUrl?: string;
+  description: string | any; // Bisa string atau portable text
+  speakers?: Speaker[];
+}
 
 const EventsPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState('all');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Ambil parameter dari URL
+  const pageParam = searchParams.get('page');
+  const searchParam = searchParams.get('search');
+  const typeParam = searchParams.get('type');
+  
+  // State untuk data dan loading
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam) : 1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage] = useState(6);
 
-  // Filter acara berdasarkan pencarian dan tipe acara
-  const filteredEvents = eventData.filter((event) => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesType = selectedType === 'all' || 
-                       (selectedType === 'online' && event.isVirtual) || 
-                       (selectedType === 'offline' && !event.isVirtual);
-    
-    return matchesSearch && matchesType;
+  // State untuk filter
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [selectedType, setSelectedType] = useState(typeParam || 'all');
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // State untuk query terakhir
+  const [lastQuery, setLastQuery] = useState({
+    searchTerm: searchParam || '',
+    type: typeParam || 'all',
+    page: pageParam ? parseInt(pageParam) : 1
   });
+
+  // Fungsi untuk mengambil data acara
+  const fetchEvents = async (page: number, filters: { searchTerm?: string; type?: string }) => {
+    setLoading(true);
+    try {
+      // Membangun URL dengan query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page.toString());
+      queryParams.append('limit', itemsPerPage.toString());
+      
+      if (filters.searchTerm) {
+        queryParams.append('search', filters.searchTerm);
+      }
+      
+      if (filters.type && filters.type !== 'all') {
+        queryParams.append('type', filters.type);
+      }
+      
+      // Panggil API route
+      const response = await fetch(`/api/acara?${queryParams.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Gagal mengambil data acara');
+      }
+      
+      const result = await response.json();
+      
+      setEvents(result.events);
+      setTotalPages(result.totalPages);
+      setTotalItems(result.totalItems);
+      
+      setLastQuery({
+        searchTerm: filters.searchTerm || '',
+        type: filters.type || 'all',
+        page
+      });
+    } catch (error) {
+      console.error('Error mengambil data acara:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fungsi untuk memperbarui URL dengan parameter filter dan halaman
+  const updateURLWithFilters = (filters: { page: number; search?: string; type?: string }) => {
+    const params = new URLSearchParams();
+    
+    if (filters.page > 1) {
+      params.set('page', filters.page.toString());
+    }
+    
+    if (filters.search) {
+      params.set('search', filters.search);
+    }
+    
+    if (filters.type && filters.type !== 'all') {
+      params.set('type', filters.type);
+    }
+    
+    const newUrl = `/acara${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(newUrl, { scroll: false });
+  };
+
+  // Effect untuk mengambil data saat komponen dimount atau parameter URL berubah
+  useEffect(() => {
+    fetchEvents(currentPage, { searchTerm, type: selectedType });
+  }, [currentPage]);
+
+  // Handler untuk mengubah halaman
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateURLWithFilters({
+      page,
+      search: searchTerm,
+      type: selectedType
+    });
+  };
+
+  // Handler untuk melakukan pencarian
+  const handleSearch = () => {
+    setIsSearching(true);
+    setCurrentPage(1);
+    
+    fetchEvents(1, { searchTerm, type: selectedType })
+      .then(() => {
+        updateURLWithFilters({
+          page: 1,
+          search: searchTerm,
+          type: selectedType
+        });
+      })
+      .finally(() => {
+        setIsSearching(false);
+      });
+  };
+
+  // Handler untuk reset filter
+  const handleResetFilter = () => {
+    setSearchTerm('');
+    setSelectedType('all');
+    setCurrentPage(1);
+    
+    fetchEvents(1, { searchTerm: '', type: 'all' })
+      .then(() => {
+        updateURLWithFilters({ page: 1 });
+      });
+  };
 
   return (
     <div className="bg-gray-50 py-12">
@@ -108,77 +191,185 @@ const EventsPage = () => {
         </div>
 
         {/* Filter dan Pencarian */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700">
-                Cari Acara
+        <div className="mb-8 rounded-xl bg-gradient-to-br from-white to-gray-50 p-6 shadow-md border border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Cari Acara
+          </h2>
+          <div className="grid gap-5 md:grid-cols-3">
+            {/* Pencarian */}
+            <div className="md:col-span-2">
+              <label htmlFor="search" className="mb-2 block text-sm font-semibold text-gray-700">
+                Kata Kunci
               </label>
-              <input
-                type="text"
-                id="search"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                placeholder="Cari berdasarkan judul atau deskripsi acara"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  id="search"
+                  placeholder="Cari berdasarkan judul, deskripsi, atau lokasi..."
+                  className="w-full rounded-lg border border-gray-300 pl-10 pr-4 py-3 bg-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm text-gray-900 font-medium placeholder:text-gray-600"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                />
+              </div>
             </div>
 
+            {/* Filter Tipe Acara */}
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="eventType" className="mb-2 block text-sm font-semibold text-gray-700">
                 Tipe Acara
               </label>
-              <select
-                id="type"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+              <div className="relative">
+                <select
+                  id="eventType"
+                  className="appearance-none w-full rounded-lg border border-gray-300 px-4 py-3 bg-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-sm text-gray-900 font-medium"
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                >
+                  <option value="all">Semua Acara</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Tombol Filter */}
+            <div className="flex items-end gap-3 md:col-span-3 mt-2">
+              <Button 
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg flex items-center justify-center gap-2"
               >
-                <option value="all">Semua Acara</option>
-                <option value="online">Online</option>
-                <option value="offline">Offline</option>
-              </select>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {isSearching ? 'Mencari...' : 'Cari Acara'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleResetFilter}
+                disabled={isSearching}
+                className="flex-1 py-3 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset Filter
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Hasil Pencarian */}
-        <div className="mb-8">
-          <p className="text-sm text-gray-500">
-            Menampilkan {filteredEvents.length} acara
+        <div className="mb-4">
+          <p className="text-sm text-gray-700">
+            {totalItems > 0 ? (
+              <>
+                Menampilkan <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}</span> sampai{' '}
+                <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span> dari{' '}
+                <span className="font-medium">{totalItems}</span> acara
+              </>
+            ) : loading ? (
+              'Memuat data...'
+            ) : (
+              'Tidak ada acara yang ditemukan'
+            )}
           </p>
         </div>
 
-        {/* Daftar Acara */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {filteredEvents.map((event) => (
-            <div
-              key={event.id}
-              className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg"
-            >
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  fill
-                />
-                {event.isVirtual && (
-                  <div className="absolute right-3 top-3 rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white">
-                    Online
+        {/* Grid Acara */}
+        {loading ? (
+          // Skeleton saat loading
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(itemsPerPage)].map((_, index) => (
+              <div key={index} className="flex h-96 animate-pulse flex-col overflow-hidden rounded-xl bg-gray-200"></div>
+            ))}
+          </div>
+        ) : events.length > 0 ? (
+          // Tampilkan acara jika ada
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {events.map((event) => (
+              <div
+                key={event._id}
+                className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg"
+              >
+                <div className="relative h-48 w-full overflow-hidden">
+                  {event.imageUrl ? (
+                    <Image
+                      src={event.imageUrl}
+                      alt={event.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gray-200">
+                      <span className="text-gray-500">Tidak ada gambar</span>
+                    </div>
+                  )}
+                  {event.isVirtual && (
+                    <div className="absolute right-2 top-2 rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white">
+                      Online
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  {/* Header dengan judul dan tanggal */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium text-primary-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span>{formatDate(event.startDate)}</span>
+                      </div>
+                      {event.isVirtual && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                          <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Online
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="mt-2 text-xl font-bold text-gray-900 line-clamp-2">
+                      {event.title}
+                    </h3>
                   </div>
-                )}
-                {!event.isVirtual && (
-                  <div className="absolute right-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-medium text-white">
-                    Offline
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  
+                  {/* Waktu acara */}
+                  <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
                     <svg
-                      className="h-5 w-5 text-primary"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-500 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -187,22 +378,20 @@ const EventsPage = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span>{event.date}</span>
-                    <span>•</span>
-                    <span>{event.startTime} - {event.endTime}</span>
+                    <div>
+                      <span className="text-gray-700">{formatTime(event.startDate)}</span>
+                      {event.endDate && <span className="text-gray-500"> - {formatTime(event.endDate)}</span>}
+                    </div>
                   </div>
-                  <Link
-                    href={`/acara/${event.slug}`}
-                    className="mt-2 block text-xl font-semibold text-gray-900 hover:text-primary"
-                  >
-                    {event.title}
-                  </Link>
-                  <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500">
+                  
+                  {/* Lokasi acara */}
+                  <div className="mb-3 flex items-start gap-2 text-sm text-gray-600">
                     <svg
-                      className="h-5 w-5 text-primary"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -220,75 +409,109 @@ const EventsPage = () => {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    <span>{event.location}</span>
+                    <div>
+                      {typeof event.location === 'object' && event.location ? (
+                        <>
+                          <span className="text-gray-700 font-medium">{event.location.name || 'Lokasi tidak tersedia'}</span>
+                          {event.location.city && (
+                            <span className="text-gray-500 block text-xs mt-0.5">{event.location.city}</span>
+                          )}
+                        </>
+                      ) : (
+                        <span>{event.location || 'Lokasi tidak tersedia'}</span>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-3 line-clamp-3 text-sm text-gray-600">
-                    {event.description}
-                  </p>
-                </div>
-                <div className="mt-6">
-                  <Button
-                    href={`/acara/${event.slug}`}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Lihat Detail
-                  </Button>
+                  
+                  {/* Deskripsi acara */}
+                  <div className="mb-4 flex-1 text-sm text-gray-600 line-clamp-3">
+                    {typeof event.description === 'string' ? (
+                      event.description
+                    ) : Array.isArray(event.description) && event.description.length > 0 ? (
+                      // Ekstrak teks dari portable text blocks
+                      event.description
+                        .filter((block: any) => block._type === 'block' && block.children)
+                        .map((block: any) => 
+                          block.children
+                            .filter((child: any) => child._type === 'span' && child.text)
+                            .map((child: any) => child.text)
+                            .join('')
+                        )
+                        .join(' ')
+                        .substring(0, 150) + (event.description.length > 0 ? '...' : '')
+                    ) : (
+                      'Klik untuk melihat detail acara'
+                    )}
+                  </div>
+                  
+                  {/* Pembicara (jika ada) */}
+                  {Array.isArray(event.speakers) && event.speakers.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <span className="text-xs font-medium text-primary-700">Pembicara:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {event.speakers.slice(0, 2).map((speaker: Speaker, index: number) => (
+                          <div key={index} className="flex items-center gap-1.5 bg-gray-50 rounded-full px-2 py-1">
+                            <div className="h-5 w-5 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 text-xs font-bold overflow-hidden">
+                              {speaker.image?.asset?._ref ? (
+                                <Image
+                                  src={`https://cdn.sanity.io/images/1btnolup/dev/${speaker.image.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`}
+                                  alt={speaker.name}
+                                  width={20}
+                                  height={20}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                speaker.name.charAt(0)
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-700">{speaker.name}</span>
+                          </div>
+                        ))}
+                        {event.speakers.length > 2 && (
+                          <div className="text-xs text-gray-500 flex items-center">
+                            +{event.speakers.length - 2} lainnya
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Tombol lihat detail */}
+                  <div className="mt-auto">
+                    <Link href={`/acara/${event.slug.current}`}>
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                      >
+                        Lihat Detail
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          // Tampilkan pesan jika tidak ada acara
+          <div className="flex h-40 flex-col items-center justify-center rounded-lg bg-gray-50 p-10 text-center">
+            <p className="text-lg font-medium text-gray-600">Tidak ada acara yang ditemukan</p>
+            <p className="mt-2 text-sm text-gray-500">Coba ubah filter pencarian Anda</p>
+          </div>
+        )}
 
         {/* Pagination */}
-        <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
-          <div className="flex flex-1 justify-between sm:hidden">
-            <Button variant="outline" size="sm">
-              Sebelumnya
-            </Button>
-            <Button variant="outline" size="sm">
-              Berikutnya
-            </Button>
-          </div>
-          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Menampilkan <span className="font-medium">1</span> sampai{' '}
-                <span className="font-medium">{filteredEvents.length}</span> dari{' '}
-                <span className="font-medium">{eventData.length}</span> acara
-              </p>
-            </div>
-            <div>
-              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                <a
-                  href="#"
-                  className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
-                >
-                  <span className="sr-only">Sebelumnya</span>
-                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
-                  </svg>
-                </a>
-                <a
-                  href="#"
-                  aria-current="page"
-                  className="relative z-10 inline-flex items-center border border-primary bg-primary-50 px-4 py-2 text-sm font-medium text-primary focus:z-20"
-                >
-                  1
-                </a>
-                <a
-                  href="#"
-                  className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
-                >
-                  <span className="sr-only">Berikutnya</span>
-                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                  </svg>
-                </a>
-              </nav>
-            </div>
-          </div>
-        </div>
+        {totalPages > 1 && !loading && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );
