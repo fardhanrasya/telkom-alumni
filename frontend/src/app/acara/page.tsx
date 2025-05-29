@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -44,7 +44,8 @@ interface Event {
   speakers?: Speaker[];
 }
 
-const EventsPage = () => {
+// Komponen ini menggunakan useSearchParams dan akan dibungkus dengan Suspense
+const EventsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -511,6 +512,15 @@ const EventsPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Wrapper komponen yang menggunakan Suspense untuk mengatasi masalah client-side rendering
+const EventsPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-20 text-center">Memuat...</div>}>
+      <EventsContent />
+    </Suspense>
   );
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -46,7 +46,8 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
-const BeritaPage = () => {
+// Komponen yang menggunakan useSearchParams dibungkus dengan Suspense
+const BeritaContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -542,6 +543,15 @@ const BeritaPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Wrapper komponen dengan Suspense boundary
+const BeritaPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-20 text-center">Memuat berita...</div>}>
+      <BeritaContent />
+    </Suspense>
   );
 };
 

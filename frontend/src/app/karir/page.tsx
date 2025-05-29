@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -24,7 +24,8 @@ interface Job {
 const jobTypes = ['Semua', 'Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'];
 const workplaceTypes = ['Semua', 'On-site', 'Remote', 'Hybrid'];
 
-const KarirPage = () => {
+// Komponen yang menggunakan useSearchParams dibungkus dengan Suspense
+const KarirContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -435,6 +436,15 @@ const KarirPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Wrapper komponen dengan Suspense boundary
+const KarirPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-20 text-center">Memuat lowongan karir...</div>}>
+      <KarirContent />
+    </Suspense>
   );
 };
 

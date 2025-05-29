@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Metadata } from 'next';
 import Head from 'next/head';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -23,7 +23,8 @@ const majorLabels: Record<string, string> = {
 };
 const graduationYears = ['Semua', '2005-2009', '2010-2015', '2016-2020', '2021-Sekarang'];
 
-const AlumniPage = () => {
+// Komponen ini menggunakan useSearchParams dan akan dibungkus dengan Suspense
+const AlumniContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -416,6 +417,15 @@ const AlumniPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Wrapper komponen dengan Suspense boundary
+const AlumniPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-20 text-center">Memuat data alumni...</div>}>
+      <AlumniContent />
+    </Suspense>
   );
 };
 
