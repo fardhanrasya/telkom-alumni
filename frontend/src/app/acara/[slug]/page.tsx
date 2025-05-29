@@ -61,7 +61,13 @@ async function getEventData(slug: string) {
   }
 }
 
-export default async function EventDetailPage({ params }: { params: { slug: string } }) {
+// Definisikan tipe params sesuai dengan yang diharapkan Next.js
+type EventDetailPageProps = {
+  params: { slug: string }
+  searchParams?: Record<string, string | string[] | undefined>
+}
+
+export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const { data: event, error } = await getEventData(params.slug);
   
   // Tampilan jika terjadi error

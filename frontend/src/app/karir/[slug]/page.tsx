@@ -31,8 +31,10 @@ interface JobDetail {
   };
 }
 
+// Definisikan tipe params sesuai dengan yang diharapkan Next.js
 interface Props {
   params: { slug: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

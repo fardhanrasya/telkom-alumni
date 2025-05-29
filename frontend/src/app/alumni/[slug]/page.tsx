@@ -85,7 +85,13 @@ async function getAlumniData(slug: string) {
   }
 }
 
-export default async function AlumniDetailPage({ params }: { params: { slug: string } }) {
+// Definisikan tipe params sesuai dengan yang diharapkan Next.js
+type AlumniDetailPageProps = {
+  params: { slug: string }
+  searchParams?: Record<string, string | string[] | undefined>
+}
+
+export default async function AlumniDetailPage({ params }: AlumniDetailPageProps) {
   const { data: alumni, error } = await getAlumniData(params.slug);
   
   // Tampilan jika terjadi error

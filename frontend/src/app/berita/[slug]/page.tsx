@@ -136,11 +136,13 @@ const portableTextComponents: PortableTextComponents = {
   },
 };
 
-export default async function NewsDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+// Definisikan tipe params sesuai dengan yang diharapkan Next.js
+type NewsDetailPageProps = {
+  params: { slug: string }
+  searchParams?: Record<string, string | string[] | undefined>
+}
+
+export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   // Mengambil data berita berdasarkan slug
   const news = await client.fetch<SanityDocument>(getNewsBySlugQuery, params, options);
   
