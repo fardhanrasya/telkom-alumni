@@ -37,7 +37,7 @@ const Navbar = () => {
                 />
               </div>
               <span className="ml-2 hidden text-xl font-bold text-primary md:block">
-                Alumni Portal
+                Portal Alumni
               </span>
             </Link>
           </div>

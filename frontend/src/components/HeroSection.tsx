@@ -18,7 +18,7 @@ const HeroSection = ({ alumni = [] }: HeroSectionProps) => {
           <div className="flex-1 space-y-6">
             <div>
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
-                <span className="block">Jaringan Alumni</span>
+                <span className="block">Portal Alumni</span>
                 <span className="block text-primary">SMK Telkom Jakarta</span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-gray-600">

@@ -43,9 +43,9 @@ const NewsSection: React.FC<NewsSectionProps> = ({ posts }) => {
                   className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div className="relative h-48 w-full bg-gray-200">
-                    {post.imageUrl && (
+                    {post.mainImageUrl && (
                       <Image
-                        src={post.imageUrl}
+                        src={post.mainImageUrl}
                         alt={post.title}
                         fill
                         className="object-cover"

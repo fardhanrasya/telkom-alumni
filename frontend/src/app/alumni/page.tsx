@@ -360,14 +360,14 @@ const AlumniContent = () => {
         {/* Grid Alumni */}
         {loading ? (
           // Skeleton saat loading
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:gap-8 lg:grid-cols-3">
             {[...Array(itemsPerPage)].map((_, index) => (
               <AlumniCardSkeleton key={index} />
             ))}
           </div>
         ) : alumni.length > 0 ? (
           // Tampilkan alumni jika ada
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:gap-8 lg:grid-cols-3">
             {alumni.map((alumni) => (
               <AlumniCard key={alumni._id} alumni={alumni} />
             ))}

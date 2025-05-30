@@ -11,11 +11,13 @@ import NewsSection from "@/components/NewsSection";
 
 // Import query yang sudah dimodularisasi
 import {
-  getRecentPostsQuery,
   getUpcomingEventsQuery,
   getFeaturedAlumniQuery,
   getRecentJobsQuery
 } from "@/sanity/queries";
+
+// Import query berita dari newsQueries
+import { getRecentNewsQuery } from "@/sanity/queries/newsQueries";
 
 // Opsi untuk revalidasi data dari Sanity
 
@@ -33,7 +35,7 @@ function formatDate(dateString: string) {
 
 export default async function IndexPage() {
   // Mengambil data dari Sanity menggunakan query modular
-  const posts = await client.fetch<SanityDocument[]>(getRecentPostsQuery(3), {}, options);
+  const posts = await client.fetch<SanityDocument[]>(getRecentNewsQuery(3), {}, options);
   const events = await client.fetch<SanityDocument[]>(getUpcomingEventsQuery(3), {}, options);
   const alumni = await client.fetch<SanityDocument[]>(getFeaturedAlumniQuery(4), {}, options);
   const jobs = await client.fetch<SanityDocument[]>(getRecentJobsQuery(3), {}, options);
