@@ -1,6 +1,4 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
-import AlumniContent from "./AlumniContent";
 
 export const metadata: Metadata = {
   title: "Alumni | Portal Alumni SMK Telkom Jakarta",
@@ -31,17 +29,3 @@ export const metadata: Metadata = {
     canonical: "/alumni",
   },
 };
-
-export default function AlumniPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="container mx-auto py-20 text-center">
-          Memuat data alumni...
-        </div>
-      }
-    >
-      <AlumniContent />
-    </Suspense>
-  );
-}
