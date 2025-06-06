@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
+import { ReactNode } from "react";
+import { Metadata } from "next";
+import { getSectionMetadata } from "@/sanity/queries";
+import { Inter } from "next/font/google";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,10 +12,35 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata: Metadata = {
-  title: "Portal Alumni SMK Telkom Jakarta",
-  description: "Portal alumni untuk menghubungkan para alumni SMK Telkom Jakarta",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const meta = await getSectionMetadata("home");
+  return {
+    title: meta?.title || "Portal Alumni SMK Telkom Jakarta",
+    description:
+      meta?.description ||
+      "Selamat datang di portal alumni SMK Telkom Jakarta.",
+    openGraph: {
+      title: meta?.ogTitle || meta?.title,
+      description: meta?.ogDescription || meta?.description,
+      type: "website",
+      images: [
+        {
+          url: meta?.ogImage || "/home-hero.jpg",
+          width: 1200,
+          height: 630,
+          alt: meta?.ogImageAlt || "Portal Alumni SMK Telkom Jakarta",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta?.twitterTitle || meta?.title,
+      description: meta?.twitterDescription || meta?.description,
+      images: [meta?.twitterImage || "/home-hero.jpg"],
+    },
+    keywords: meta?.keywords || [],
+  };
+}
 
 export default function RootLayout({
   children,
@@ -22,7 +49,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
+      <body
+        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}
+      >
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
