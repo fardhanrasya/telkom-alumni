@@ -47,3 +47,5 @@ jobs:
       env:
         SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
         SANITY_STUDIO_HOSTNAME: ${{ vars.SANITY_STUDIO_HOSTNAME || 'localhost:3333' }}
+        SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+        SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
