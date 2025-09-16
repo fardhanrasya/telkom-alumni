@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['cdn.sanity.io'],
+    domains: ["cdn.sanity.io", "avatars.githubusercontent.com"],
   },
   // Menonaktifkan type checking saat build untuk mengatasi masalah deployment
   typescript: {

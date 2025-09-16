@@ -1,6 +1,6 @@
 import React from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import Contributors from "@/components/Contributors";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -54,13 +54,12 @@ const AboutPage = () => {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-                Visi Kami
+                Visi SMK Telkom Jakarta
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Menjadi platform alumni terkemuka yang menghubungkan dan
-                memberdayakan alumni SMK Telkom Jakarta untuk berkolaborasi,
-                berbagi pengetahuan, dan memberikan kontribusi positif bagi
-                komunitas dan industri.
+                Menjadi Sekolah Kejuruan Terdepan yang Menghasilkan Lulusan
+                Berdaya Saing Global, Inovatif, dan Unggul dalam Teknologi serta
+                Siap Menghadapi Tantangan Industri Digital.
               </p>
             </div>
             <div className="flex flex-col items-center text-center md:items-start md:text-left">
@@ -80,7 +79,7 @@ const AboutPage = () => {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-                Misi Kami
+                Misi SMK Telkom Jakarta
               </h2>
               <ul className="mt-4 space-y-2 text-lg text-gray-600">
                 <li className="flex items-start">
@@ -98,7 +97,7 @@ const AboutPage = () => {
                     />
                   </svg>
                   <span className="ml-2">
-                    Membangun jaringan profesional yang kuat antar alumni
+                    Menyelenggarakan pembelajaran berbasis industri
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -116,8 +115,7 @@ const AboutPage = () => {
                     />
                   </svg>
                   <span className="ml-2">
-                    Memfasilitasi berbagai kegiatan untuk pengembangan karir dan
-                    profesional
+                    Membangun kemitraan erat dengan dunia usaha dan industri
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -135,7 +133,7 @@ const AboutPage = () => {
                     />
                   </svg>
                   <span className="ml-2">
-                    Mendukung perkembangan SMK Telkom Jakarta dan siswa-siswinya
+                    Mengintegrasikan teknologi modern dalam pembelajaran
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -153,8 +151,25 @@ const AboutPage = () => {
                     />
                   </svg>
                   <span className="ml-2">
-                    Menginspirasi alumni untuk terus berinovasi dan
-                    berkontribusi dalam industri
+                    Memperkuat jaringan alumni sebagai mentor dan mitra industri
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <svg
+                    className="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span className="ml-2">
+                    Mendorong sertifikasi kompetensi nasional dan internasional
                   </span>
                 </li>
               </ul>
@@ -168,20 +183,29 @@ const AboutPage = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Sejarah Singkat
+              Sejarah SMK Telkom Jakarta
             </h2>
             <p className="mt-4 text-lg text-gray-600">
-              SMK Telkom Jakarta didirikan pada tahun 1992 oleh Yayasan
-              Sandhykara Putra Telkom, sebagai sekolah menengah kejuruan yang
-              berfokus pada pendidikan teknologi informasi dan komunikasi.
-              Selama lebih dari 30 tahun, SMK Telkom Jakarta telah menghasilkan
-              lulusan berkualitas yang tersebar di berbagai perusahaan terkemuka
-              di Indonesia maupun internasional.
+              SMK Telkom Jakarta yang sebelumnya bernama SMK Telkom Sandhy Putra
+              Jakarta, sejak Maret 2014 berubah menjadi SMK Telkom Jakarta
+              dengan dicanangkannya Telkom Schools oleh Telkom Foundation.
+              Sekolah ini dikelola oleh Yayasan Sandhykara Putra Telkom (YSPT)
+              yang didirikan pada tanggal 17 Januari 1980.
             </p>
             <p className="mt-4 text-lg text-gray-600">
-              Portal Alumni SMK Telkom Jakarta dibentuk pada tahun 2023 sebagai
-              wadah untuk mempererat hubungan antar alumni, memperluas jaringan
-              profesional, dan mendukung perkembangan karir para alumni.
+              Peluncuran Telkom Schools dilaksanakan di SMK Telkom Jakarta pada
+              tanggal 23 Januari 2014 oleh Dirjen Pendidikan Menengah
+              Kemendikbud RI Prof. Dr. Ir. Achmad Jazidie. Telkom Schools
+              menjadi sarana pengabdian PT. Telkom grup dalam program CSR di
+              bidang pengembangan pendidikan, khususnya pendidikan penguasaan
+              teknologi ICT untuk mendukung industri TIMES (Telecommunication
+              Information Media Edutainment & Services).
+            </p>
+            <p className="mt-4 text-lg text-gray-600">
+              Portal Alumni SMK Telkom Jakarta dibentuk sebagai wadah untuk
+              mempererat hubungan antar alumni, memperluas jaringan profesional,
+              dan mendukung perkembangan karir para alumni dalam menghadapi
+              tantangan industri digital.
             </p>
           </div>
 
@@ -198,123 +222,31 @@ const AboutPage = () => {
                 </p>
               </div>
               <div className="rounded-lg bg-white p-6 shadow-md">
-                <div className="mb-4 text-3xl font-bold text-primary">30+</div>
+                <div className="mb-4 text-3xl font-bold text-primary">44+</div>
                 <h3 className="text-xl font-semibold text-gray-900">Tahun</h3>
                 <p className="mt-2 text-gray-600">
-                  Pengalaman dalam mendidik generasi teknologi informasi
-                  Indonesia
+                  Pengalaman Yayasan Sandhykara Putra Telkom dalam bidang
+                  pendidikan teknologi Indonesia
                 </p>
               </div>
               <div className="rounded-lg bg-white p-6 shadow-md">
-                <div className="mb-4 text-3xl font-bold text-primary">100+</div>
+                <div className="mb-4 text-3xl font-bold text-primary">
+                  TIMES
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900">
-                  Perusahaan Partner
+                  Industri Focus
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  Bekerja sama dengan industri untuk meningkatkan kualitas
-                  lulusan
+                  Telecommunication, Information, Media, Edutainment & Services
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tim Pengurus */}
-      <div className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Tim Pengurus Portal Alumni
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-              Kenali tim di balik Portal Alumni SMK Telkom Jakarta yang
-              berdedikasi untuk menghubungkan dan memberdayakan alumni.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Anggota Tim 1 */}
-            <div className="text-center">
-              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full">
-                <div className="relative h-full w-full">
-                  <Image
-                    src="/team-1.jpg"
-                    alt="Foto Ketua"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">
-                Ahmad Fauzi
-              </h3>
-              <p className="text-primary">Ketua Ikatan Alumni</p>
-              <p className="mt-2 text-sm text-gray-600">Alumni Angkatan 2005</p>
-            </div>
-
-            {/* Anggota Tim 2 */}
-            <div className="text-center">
-              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full">
-                <div className="relative h-full w-full">
-                  <Image
-                    src="/team-2.jpg"
-                    alt="Foto Wakil Ketua"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">
-                Siti Rahmawati
-              </h3>
-              <p className="text-primary">Wakil Ketua</p>
-              <p className="mt-2 text-sm text-gray-600">Alumni Angkatan 2008</p>
-            </div>
-
-            {/* Anggota Tim 3 */}
-            <div className="text-center">
-              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full">
-                <div className="relative h-full w-full">
-                  <Image
-                    src="/team-3.jpg"
-                    alt="Foto Sekretaris"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">
-                Dimas Pratama
-              </h3>
-              <p className="text-primary">Sekretaris</p>
-              <p className="mt-2 text-sm text-gray-600">Alumni Angkatan 2010</p>
-            </div>
-
-            {/* Anggota Tim 4 */}
-            <div className="text-center">
-              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full">
-                <div className="relative h-full w-full">
-                  <Image
-                    src="/team-4.jpg"
-                    alt="Foto Bendahara"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">
-                Anita Wijaya
-              </h3>
-              <p className="text-primary">Bendahara</p>
-              <p className="mt-2 text-sm text-gray-600">Alumni Angkatan 2012</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* FAQ */}
-      <div className="bg-gray-50 py-16">
+      <div className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -386,35 +318,8 @@ const AboutPage = () => {
         </div>
       </div>
 
-      {/* CTA */}
-      <div className="bg-primary py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Gabung Dengan Komunitas Alumni Kami
-            </h2>
-            <p className="mt-4 text-lg text-white/90">
-              Jalin koneksi dengan ribuan alumni SMK Telkom Jakarta dan akses
-              berbagai kesempatan pengembangan karir.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button
-                href="/daftar"
-                className="bg-white text-primary hover:bg-gray-100"
-              >
-                Daftar Sekarang
-              </Button>
-              <Button
-                href="/kontak"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-primary"
-              >
-                Hubungi Kami
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Contributors Section */}
+      <Contributors />
     </div>
   );
 };
