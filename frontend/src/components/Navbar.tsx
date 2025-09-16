@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/Button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,7 +26,7 @@ const Navbar = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="relative h-10 w-40">
+              <div className="relative h-10 w-10">
                 <Image
                   src="/favicon.ico"
                   alt="Logo SMK Telkom Jakarta"
@@ -36,7 +35,7 @@ const Navbar = () => {
                   priority
                 />
               </div>
-              <span className="ml-2 hidden text-xl font-bold text-primary md:block">
+              <span className="ml-4 text-xl font-bold text-primary">
                 Portal Alumni
               </span>
             </Link>
