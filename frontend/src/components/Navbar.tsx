@@ -15,6 +15,7 @@ const Navbar = () => {
     { href: "/acara", label: "Acara" },
     { href: "/karir", label: "Karir" },
     { href: "/berita", label: "Berita" },
+    { href: "/galeri", label: "Galeri" },
     { href: "/tentang", label: "Tentang" },
   ];
 
