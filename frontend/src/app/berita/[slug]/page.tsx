@@ -404,6 +404,7 @@ export async function generateMetadata({
     title: `${news.title} | Portal Alumni SMK Telkom Jakarta`,
     description: description,
     openGraph: {
+      siteName: "Portal Alumni SMK Telkom Jakarta",
       title: `${news.title} | Portal Alumni SMK Telkom Jakarta`,
       description: description,
       type: "article",
