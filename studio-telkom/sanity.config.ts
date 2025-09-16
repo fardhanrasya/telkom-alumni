@@ -8,7 +8,7 @@ export default defineConfig({
   title: 'Telkom',
 
   projectId: '1btnolup',
-  dataset: 'production',
+  dataset: 'dev',
 
   plugins: [structureTool(), visionTool()],
 
