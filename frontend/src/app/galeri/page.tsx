@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 10;
 
 // Configure ISR with 30-second revalidation as fallback
 export const revalidate = 30;

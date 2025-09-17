@@ -6,8 +6,7 @@ import Link from "next/link";
 import {
   Gallery,
   GalleryImage,
-  getGalleriesPaginated,
-  getGalleriesByCategoryPaginated,
+  getAllGalleries,
 } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
 
@@ -27,30 +26,21 @@ interface MasonryItem {
   category?: string;
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 10;
 
 export default function MasonryGallery({
   initialGalleries,
   initialHasMore,
 }: MasonryGalleryProps) {
-  const [galleries, setGalleries] = useState<Gallery[]>(initialGalleries);
-  const [items, setItems] = useState<MasonryItem[]>([]);
+  const [allItems, setAllItems] = useState<MasonryItem[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<MasonryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-
-  // Removed polling functionality - no need to track last update
-  // useEffect(() => {
-  //   async function fetchLastUpdate() {
-  //     const ts = await getLastUpdateTimestamp();
-  //     setLastUpdate(ts);
-  //   }
-  //   fetchLastUpdate();
-  // }, []);
 
   const categories = [
     { value: "all", label: "Semua" },
@@ -61,6 +51,7 @@ export default function MasonryGallery({
     { value: "lainnya", label: "Lainnya" },
   ];
 
+  // Convert galleries to items on initial load
   const convertGalleriesToItems = useCallback(
     (galleries: Gallery[]): MasonryItem[] => {
       const allItems: MasonryItem[] = [];
@@ -69,7 +60,7 @@ export default function MasonryGallery({
         gallery.images.forEach((img: GalleryImage, index: number) => {
           allItems.push({
             id: `${gallery._id}-${index}`,
-            src: urlFor(img.image.asset)?.width(400).quality(80).url() || "",
+            src: urlFor(img.image.asset)?.width(600).quality(100).url() || "",
             alt: img.alt,
             width: img.image.asset.metadata.dimensions.width,
             height: img.image.asset.metadata.dimensions.height,
@@ -85,98 +76,77 @@ export default function MasonryGallery({
     []
   );
 
-  const loadMoreGalleries = useCallback(async () => {
+  // Load all galleries and convert to items on mount
+  useEffect(() => {
+    const loadAllImages = async () => {
+      setLoading(true);
+      try {
+        const allGalleries = await getAllGalleries();
+        const items = convertGalleriesToItems(allGalleries);
+        setAllItems(items);
+
+        // Show first batch of items
+        const firstBatch = items.slice(0, ITEMS_PER_PAGE);
+        setDisplayedItems(firstBatch);
+        setCurrentImageIndex(ITEMS_PER_PAGE);
+        setHasMore(items.length > ITEMS_PER_PAGE);
+      } catch (error) {
+        console.error("Error loading galleries:", error);
+        setError("Gagal memuat galeri");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAllImages();
+  }, [convertGalleriesToItems]);
+
+  // Load more images (pagination at image level)
+  const loadMoreImages = useCallback(() => {
     if (loading || !hasMore) return;
 
     setLoading(true);
-    try {
-      const start = page * ITEMS_PER_PAGE;
-      const end = start + ITEMS_PER_PAGE - 1;
 
-      let newGalleries: Gallery[] = [];
+    const filteredItems =
+      selectedCategory === "all"
+        ? allItems
+        : allItems.filter((item) => item.category === selectedCategory);
 
-      if (selectedCategory === "all") {
-        newGalleries = await getGalleriesPaginated(start, end);
-      } else {
-        newGalleries = await getGalleriesByCategoryPaginated(
-          selectedCategory,
-          start,
-          end
-        );
-      }
+    const nextBatch = filteredItems.slice(
+      currentImageIndex,
+      currentImageIndex + ITEMS_PER_PAGE
+    );
 
-      if (newGalleries.length < ITEMS_PER_PAGE) {
-        setHasMore(false);
-      }
-
-      if (newGalleries.length > 0) {
-        setGalleries((prev) => [...prev, ...newGalleries]);
-        setPage((prev) => prev + 1);
-      }
-    } catch (error) {
-      console.error("Error loading more galleries:", error);
-    } finally {
-      setLoading(false);
+    if (nextBatch.length > 0) {
+      setDisplayedItems((prev) => [...prev, ...nextBatch]);
+      setCurrentImageIndex((prev) => prev + ITEMS_PER_PAGE);
     }
-  }, [loading, hasMore, page, selectedCategory]);
 
-  // Reset when category changes
-  const handleCategoryChange = useCallback(async (category: string) => {
-    setSelectedCategory(category);
-    setPage(1);
-    setLoading(true);
-
-    try {
-      let newGalleries: Gallery[] = [];
-
-      if (category === "all") {
-        newGalleries = await getGalleriesPaginated(0, ITEMS_PER_PAGE - 1);
-      } else {
-        newGalleries = await getGalleriesByCategoryPaginated(
-          category,
-          0,
-          ITEMS_PER_PAGE - 1
-        );
-      }
-
-      setGalleries(newGalleries);
-      setHasMore(newGalleries.length === ITEMS_PER_PAGE);
-    } catch (error) {
-      console.error("Error loading galleries by category:", error);
-    } finally {
-      setLoading(false);
+    if (currentImageIndex + ITEMS_PER_PAGE >= filteredItems.length) {
+      setHasMore(false);
     }
-  }, []);
 
-  // Removed auto-refresh functionality - data updates only on page refresh
-  // const refreshGalleryDataIfUpdated = useCallback(async () => {
-  //   // Auto-polling removed for better performance
-  // }, [selectedCategory, lastUpdate]);
+    setLoading(false);
+  }, [allItems, selectedCategory, currentImageIndex, loading, hasMore]);
 
-  // Removed auto-check for updates - no more polling
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     refreshGalleryDataIfUpdated();
-  //   }, 30000);
-  //   return () => clearInterval(interval);
-  // }, [refreshGalleryDataIfUpdated]);
+  // Handle category change
+  const handleCategoryChange = useCallback(
+    (category: string) => {
+      setSelectedCategory(category);
 
-  // Convert galleries to items when galleries change
-  useEffect(() => {
-    const allItems = convertGalleriesToItems(galleries);
+      const filteredItems =
+        category === "all"
+          ? allItems
+          : allItems.filter((item) => item.category === category);
 
-    // When selectedCategory is "all", show all items without filtering
-    // since the server-side query already handles category filtering correctly
-    if (selectedCategory === "all") {
-      setItems(allItems);
-    } else {
-      // Only apply client-side filtering for specific categories
-      const filteredItems = allItems.filter(
-        (item) => item.category === selectedCategory
-      );
-      setItems(filteredItems);
-    }
-  }, [galleries, selectedCategory, convertGalleriesToItems]);
+      // Reset displayed items to first batch of filtered items
+      const firstBatch = filteredItems.slice(0, ITEMS_PER_PAGE);
+      setDisplayedItems(firstBatch);
+      setCurrentImageIndex(ITEMS_PER_PAGE);
+      setHasMore(filteredItems.length > ITEMS_PER_PAGE);
+    },
+    [allItems]
+  );
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -187,7 +157,7 @@ export default function MasonryGallery({
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          loadMoreGalleries();
+          loadMoreImages();
         }
       },
       { threshold: 0.1 }
@@ -202,7 +172,7 @@ export default function MasonryGallery({
         observerRef.current.disconnect();
       }
     };
-  }, [hasMore, loading, loadMoreGalleries]);
+  }, [hasMore, loading, loadMoreImages]);
 
   return (
     <div className="w-full">
@@ -231,7 +201,7 @@ export default function MasonryGallery({
           <button
             onClick={() => {
               setError(null);
-              handleCategoryChange(selectedCategory);
+              window.location.reload();
             }}
             className="mt-2 mx-auto block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
           >
@@ -241,18 +211,19 @@ export default function MasonryGallery({
       )}
 
       {/* Masonry Grid */}
-      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-        {items.map((item) => (
-          <div key={item.id} className="break-inside-avoid mb-4">
+      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+        {displayedItems.map((item) => (
+          <div key={item.id} className="break-inside-avoid mb-6">
             <Link href={`/galeri/${item.slug}`} className="block group">
               <div className="relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
                 <Image
                   src={item.src}
                   alt={item.alt}
-                  width={400}
-                  height={(400 * item.height) / item.width}
+                  width={600}
+                  height={(600 * item.height) / item.width}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-end">
                   <div className="p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
@@ -279,7 +250,7 @@ export default function MasonryGallery({
         </div>
       )}
 
-      {items.length === 0 && !loading && (
+      {displayedItems.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500">Tidak ada gambar untuk kategori ini.</p>
         </div>

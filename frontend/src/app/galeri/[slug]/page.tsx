@@ -138,11 +138,14 @@ export default async function GaleriDetailPage({ params }: Props) {
         <div className="container mx-auto px-4">
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
             {gallery.images.map((img) => (
-              <div key={img.image.asset._id} className="break-inside-avoid mb-6">
+              <div
+                key={img.image.asset._id}
+                className="break-inside-avoid mb-6"
+              >
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                   <Image
                     src={
-                      urlFor(img.image.asset)?.width(600).quality(85).url() ??
+                      urlFor(img.image.asset)?.width(600).quality(100).url() ??
                       ""
                     }
                     alt={img.alt}
@@ -153,6 +156,7 @@ export default async function GaleriDetailPage({ params }: Props) {
                     }
                     className="w-full h-auto object-cover"
                     loading="lazy"
+                    unoptimized
                   />
                   {img.caption && (
                     <div className="p-4">

@@ -64,13 +64,13 @@ export async function getGalleriesPaginated(
   end: number = 11
 ): Promise<Gallery[]> {
   // During build time or server-side rendering, use direct client calls
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return await client.fetch(galleryPaginatedQuery, { start, end });
   }
-  
+
   // Client-side: use API route
   try {
-    const page = Math.floor(start / 12) + 1;
+    const page = Math.floor(start / 10) + 1;
     const limit = end - start + 1;
     const response = await fetch(
       `/api/galeri?page=${page}&limit=${limit}&action=list`
@@ -91,10 +91,10 @@ export async function getGalleriesPaginated(
 
 export async function getGalleriesCount(): Promise<number> {
   // During build time or server-side rendering, use direct client calls
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return await client.fetch(galleryCountQuery);
   }
-  
+
   // Client-side: use API route
   try {
     const response = await fetch("/api/galeri?action=count");
@@ -118,13 +118,13 @@ export async function getGalleriesByCategoryPaginated(
   end: number = 11
 ): Promise<Gallery[]> {
   // During build time or server-side rendering, use direct client calls
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return await client.fetch(galleryByCategoryQuery, { category, start, end });
   }
-  
+
   // Client-side: use API route
   try {
-    const page = Math.floor(start / 12) + 1;
+    const page = Math.floor(start / 10) + 1;
     const limit = end - start + 1;
     const response = await fetch(
       `/api/galeri?page=${page}&limit=${limit}&category=${category}&action=list`
@@ -152,12 +152,12 @@ export async function getGalleriesByCategoryCount(
 // Timestamp tracking functions
 export async function getLastUpdateTimestamp(): Promise<number> {
   // During build time or server-side rendering, use direct client calls
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     const query = `*[_type == "gallery" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`;
     const lastUpdate = await client.fetch(query);
     return lastUpdate ? new Date(lastUpdate).getTime() : 0;
   }
-  
+
   // Client-side: use API route
   try {
     const response = await fetch("/api/galeri?action=lastUpdate");
