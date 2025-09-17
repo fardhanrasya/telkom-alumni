@@ -19,7 +19,7 @@ const Pagination: React.FC<PaginationProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  // Memoize page numbers calculation
+  // Menghitung nomor halaman yang akan ditampilkan
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -48,14 +48,14 @@ const Pagination: React.FC<PaginationProps> = ({
     ];
   }, [currentPage, totalPages]);
 
-  // Memoize URL creation function
+  // Fungsi untuk membuat URL dengan parameter halaman
   const createPageUrl = useCallback((pageNumber: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', pageNumber.toString());
     return `${baseUrl || pathname}?${params.toString()}`;
   }, [searchParams, baseUrl, pathname]);
 
-  // Memoize page change handlers
+  // Handler untuk perubahan halaman
   const handlePageChange = useCallback((pageNumber: number) => {
     onPageChange?.(pageNumber);
   }, [onPageChange]);
@@ -70,7 +70,7 @@ const Pagination: React.FC<PaginationProps> = ({
     handlePageChange(currentPage + 1);
   }, [currentPage, handlePageChange]);
 
-  // Early return for single page
+  // Kembali lebih awal jika hanya ada satu halaman
   if (totalPages <= 1) {
     return null;
   }
@@ -312,7 +312,7 @@ const PaginationPageLink: React.FC<{
   </Link>
 );
 
-// Icon Components (extracted for reusability)
+// Icon Components
 const ChevronLeftIcon: React.FC = () => (
   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
     <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
