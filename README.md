@@ -59,23 +59,6 @@ Portal Alumni untuk menghubungkan para alumni SMK Telkom Jakarta.
    ```
    Buka http://localhost:3000 di browser Anda
 
-## 🤝 Berkontribusi
-
-Kami sangat menghargai kontribusi Anda! Berikut cara untuk berkontribusi:
-
-1. Fork repository ini
-2. Buat branch fitur baru (`git checkout -b fitur/namafitur`)
-3. Commit perubahan Anda (`git commit -m 'Menambahkan fitur baru'`)
-4. Push ke branch (`git push origin fitur/namafitur`)
-5. Buat Pull Request
-
-### Panduan Kontribusi
-
-- Pastikan kode Anda mengikuti standar koding yang ada
-- Tuliskan deskripsi yang jelas untuk setiap perubahan
-- Update dokumentasi jika diperlukan
-- Pastikan semua test berhasil dijalankan
-
 ## 🚀 Deployment
 
 ### Sanity Studio
