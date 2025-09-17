@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import { revalidationManager } from "@/lib/revalidation-manager";
 import { webhookLogger, securityLogger, performanceLogger } from "@/lib/logger";
-import { webhookRateLimiter, signatureRateLimiter } from "@/lib/rate-limiter";
 import { validateWebhookRequest, isAllowedIP } from "@/lib/validation";
 
 // Sanity webhook payload interface
@@ -87,28 +86,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Apply rate limiting
-    const rateLimitResult = webhookRateLimiter.checkLimit(clientIP);
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          retryAfter: Math.ceil(
-            (rateLimitResult.resetTime - Date.now()) / 1000
-          ),
-        },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": "30",
-            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
-            "X-RateLimit-Reset": rateLimitResult.resetTime.toString(),
-            "Retry-After": Math.ceil(
-              (rateLimitResult.resetTime - Date.now()) / 1000
-            ).toString(),
-          },
-        }
-      );
-    }
 
     // Check if webhook secret is configured
     const webhookSecret = process.env.SANITY_WEBHOOK_SECRET;
@@ -142,7 +119,6 @@ export async function POST(request: NextRequest) {
     // Verify webhook signature
     if (!verifySignature(body, signature, webhookSecret)) {
       // Apply signature-specific rate limiting for failed attempts
-      signatureRateLimiter.recordRequest(clientIP, false);
       securityLogger.invalidSignature(signature, clientIP);
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
