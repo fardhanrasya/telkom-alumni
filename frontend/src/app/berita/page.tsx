@@ -88,30 +88,44 @@ const BeritaContent = () => {
   });
 
   // Fungsi untuk mengambil data berita menggunakan API route
+const handleFeaturedNews = async (regularNews: News[]) => {
+    try {
+      const featuredResponse = await fetch("/api/berita/featured");
+      
+      if (featuredResponse.ok) {
+        const featuredResult = await featuredResponse.json();
+        if (featuredResult.news?.length > 0) {
+          setFeaturedNews(featuredResult.news[0]);
+          return;
+        }
+      }
+      
+      const featured = regularNews.find((item: News) => item.featured) || regularNews[0];
+      setFeaturedNews(featured);
+    } catch (error) {
+      console.error("Error mengambil berita unggulan:", error);
+      const featured = regularNews.find((item: News) => item.featured) || regularNews[0];
+      setFeaturedNews(featured);
+    }
+  };
+
+  
   const fetchNews = async (
     page: number,
     filters: { searchTerm?: string; tag?: string; year?: string }
   ) => {
     setLoading(true);
+    
     try {
-      // Membangun URL dengan query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", itemsPerPage.toString());
+      // Paramater optimizedd
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: itemsPerPage.toString(),
+        ...(filters.searchTerm && { search: filters.searchTerm }),
+        ...(filters.tag && { tag: filters.tag }),
+        ...(filters.year && filters.year !== "Semua" && { year: filters.year })
+      });
 
-      if (filters.searchTerm) {
-        queryParams.append("search", filters.searchTerm);
-      }
-
-      if (filters.tag) {
-        queryParams.append("tag", filters.tag);
-      }
-
-      if (filters.year && filters.year !== "Semua") {
-        queryParams.append("year", filters.year);
-      }
-
-      // Panggil API route
       const response = await fetch(`/api/berita?${queryParams.toString()}`);
 
       if (!response.ok) {
@@ -124,33 +138,11 @@ const BeritaContent = () => {
       setTotalPages(result.pagination.totalPages);
       setTotalItems(result.pagination.totalItems);
 
-      // Ambil berita unggulan jika halaman pertama
+      // OPTIMIZED FEATURED NEWS HANDLING
       if (page === 1) {
-        try {
-          // Panggil API khusus untuk mendapatkan berita unggulan
-          const featuredResponse = await fetch("/api/berita/featured");
-          if (featuredResponse.ok) {
-            const featuredResult = await featuredResponse.json();
-            if (featuredResult.news && featuredResult.news.length > 0) {
-              setFeaturedNews(featuredResult.news[0]);
-            } else {
-              // Jika tidak ada berita unggulan, gunakan berita pertama
-              const featured =
-                result.news.find((item: News) => item.featured) ||
-                result.news[0];
-              setFeaturedNews(featured);
-            }
-          }
-        } catch (error) {
-          console.error("Error mengambil berita unggulan:", error);
-          // Fallback ke cara lama jika API berita unggulan gagal
-          const featured =
-            result.news.find((item: News) => item.featured) || result.news[0];
-          setFeaturedNews(featured);
-        }
+        await handleFeaturedNews(result.news);
       }
 
-      // Memastikan bahwa nilai yang diset ke lastQuery selalu memiliki tipe data yang benar
       setLastQuery({
         searchTerm: filters.searchTerm || "",
         tag: filters.tag || "",
@@ -163,7 +155,6 @@ const BeritaContent = () => {
       setLoading(false);
     }
   };
-
   // Fungsi untuk mengambil data tag berita
   const fetchTags = async () => {
     try {
