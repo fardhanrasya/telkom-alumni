@@ -1,0 +1,80 @@
+.layoutGrid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, minmax(120px, auto));
+  min-height: 400px;
+}
+
+.gridItem {
+  position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .layoutGrid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, minmax(100px, auto));
+    min-height: 300px;
+  }
+
+  /* Adjust grid areas for mobile */
+  .gridItem:nth-child(1) {
+    grid-area: 1 / 1 / 3 / 3;
+  }
+  .gridItem:nth-child(2) {
+    grid-area: 1 / 3 / 2 / 4;
+  }
+  .gridItem:nth-child(3) {
+    grid-area: 2 / 3 / 4 / 4;
+  }
+  .gridItem:nth-child(4) {
+    grid-area: 3 / 1 / 4 / 2;
+  }
+  .gridItem:nth-child(5) {
+    grid-area: 3 / 2 / 4 / 3;
+  }
+  .gridItem:nth-child(6) {
+    grid-area: 4 / 1 / 6 / 2;
+  }
+  .gridItem:nth-child(7) {
+    grid-area: 4 / 2 / 5 / 3;
+  }
+  .gridItem:nth-child(8) {
+    grid-area: 4 / 3 / 5 / 4;
+  }
+  .gridItem:nth-child(9) {
+    grid-area: 5 / 2 / 6 / 4;
+  }
+  .gridItem:nth-child(10) {
+    grid-area: 6 / 1 / 7 / 4;
+  }
+}
+
+@media (max-width: 480px) {
+  .layoutGrid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+    gap: 0.5rem;
+    min-height: auto;
+  }
+
+  /* Simple 2-column sequential layout for very small screens */
+  .gridItem {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    grid-area: auto !important;
+    aspect-ratio: 1;
+  }
+}
+/* Dynamic grid area utility - will be set via CSS custom properties */
+.gridItem[style*="grid-area"] {
+  /* This allows the inline style to work while keeping the warning minimal */
+}
+
+/* Fallback layout for items without specific grid areas */
+.gridItem:not([style*="grid-area"]) {
+  grid-column: auto;
+  grid-row: auto;
+}

@@ -18,6 +18,7 @@ export default async function GaleriPage() {
     getGalleriesPaginated(0, ITEMS_PER_PAGE - 1),
     getGalleriesCount(),
   ]);
+  console.log(galleries);
 
   const hasMore = totalCount > ITEMS_PER_PAGE;
 
