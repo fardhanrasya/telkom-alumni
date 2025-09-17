@@ -10,6 +10,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Configure ISR with 30-second revalidation as fallback
+export const revalidate = 30;
+
 export async function generateStaticParams() {
   const galleries = await getAllGalleries();
   return galleries.map((gallery) => ({
@@ -33,31 +36,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
     openGraph: {
       title: `${gallery.title} - Galeri SMK Telkom Jakarta`,
-      description: gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
+      description:
+        gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
       type: "article",
-      images: gallery.images.length > 0 ? [
-        {
-          url: urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() || "/galeri-hero.jpg",
-          width: 1200,
-          height: 630,
-          alt: gallery.images[0].alt || gallery.title,
-        },
-      ] : [
-        {
-          url: "/galeri-hero.jpg",
-          width: 1200,
-          height: 630,
-          alt: gallery.title,
-        },
-      ],
+      images:
+        gallery.images.length > 0
+          ? [
+              {
+                url:
+                  urlFor(gallery.images[0].image.asset)
+                    ?.width(1200)
+                    .quality(85)
+                    .url() || "/galeri-hero.jpg",
+                width: 1200,
+                height: 630,
+                alt: gallery.images[0].alt || gallery.title,
+              },
+            ]
+          : [
+              {
+                url: "/galeri-hero.jpg",
+                width: 1200,
+                height: 630,
+                alt: gallery.title,
+              },
+            ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${gallery.title} - Galeri SMK Telkom Jakarta`,
-      description: gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
-      images: gallery.images.length > 0 ? [
-        urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() || "/galeri-hero.jpg"
-      ] : ["/galeri-hero.jpg"],
+      description:
+        gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
+      images:
+        gallery.images.length > 0
+          ? [
+              urlFor(gallery.images[0].image.asset)
+                ?.width(1200)
+                .quality(85)
+                .url() || "/galeri-hero.jpg",
+            ]
+          : ["/galeri-hero.jpg"],
     },
     alternates: {
       canonical: `/galeri/${slug}`,

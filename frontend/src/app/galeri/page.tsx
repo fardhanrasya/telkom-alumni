@@ -7,10 +7,12 @@ import MasonryGallery from "@/components/MasonryGallery";
 
 export const metadata: Metadata = {
   title: "Galeri | Portal Alumni SMK Telkom Jakarta",
-  description: "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta. Dokumentasi memori berharga komunitas alumni.",
+  description:
+    "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta. Dokumentasi memori berharga komunitas alumni.",
   openGraph: {
     title: "Galeri | Portal Alumni SMK Telkom Jakarta",
-    description: "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
+    description:
+      "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
     type: "website",
     images: [
       {
@@ -24,7 +26,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Galeri SMK Telkom Jakarta",
-    description: "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
+    description:
+      "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
     images: ["/galeri-hero.jpg"],
   },
   alternates: {
@@ -33,6 +36,9 @@ export const metadata: Metadata = {
 };
 
 const ITEMS_PER_PAGE = 12;
+
+// Configure ISR with 30-second revalidation as fallback
+export const revalidate = 30;
 
 export default async function GaleriPage() {
   const [galleries, totalCount] = await Promise.all([

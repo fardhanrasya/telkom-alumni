@@ -8,8 +8,11 @@ import {
   GalleryImage,
   getGalleriesPaginated,
   getGalleriesByCategoryPaginated,
+  getLastUpdateTimestamp,
+  checkForUpdates,
 } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
+// Removed: import { useGalleryUpdates } from "@/hooks/useGalleryUpdates";
 
 interface MasonryGalleryProps {
   initialGalleries: Gallery[];
@@ -39,8 +42,20 @@ export default function MasonryGallery({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(1);
+  const [lastUpdate, setLastUpdate] = useState<number>(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
+
+  // On mount, get the last update timestamp
+  useEffect(() => {
+    async function fetchLastUpdate() {
+      const ts = await getLastUpdateTimestamp();
+      setLastUpdate(ts);
+    }
+    fetchLastUpdate();
+  }, []);
+
+  // Removed: useGalleryUpdates hook and related logic
 
   const categories = [
     { value: "all", label: "Semua" },
@@ -138,17 +153,55 @@ export default function MasonryGallery({
     }
   }, []);
 
+  // Only refresh if there is an update
+  const refreshGalleryDataIfUpdated = useCallback(async () => {
+    try {
+      const currentLastUpdate = await getLastUpdateTimestamp();
+      if (currentLastUpdate > lastUpdate) {
+        setLoading(true);
+        let newGalleries: Gallery[] = [];
+        if (selectedCategory === "all") {
+          newGalleries = await getGalleriesPaginated(0, ITEMS_PER_PAGE - 1);
+        } else {
+          newGalleries = await getGalleriesByCategoryPaginated(
+            selectedCategory,
+            0,
+            ITEMS_PER_PAGE - 1
+          );
+        }
+        setGalleries(newGalleries);
+        setHasMore(newGalleries.length === ITEMS_PER_PAGE);
+        setPage(1);
+        setLastUpdate(currentLastUpdate);
+      }
+    } catch (error) {
+      console.error("Error checking or refreshing gallery data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, lastUpdate]);
+
+  // Auto-check for updates every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshGalleryDataIfUpdated();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [refreshGalleryDataIfUpdated]);
+
   // Convert galleries to items when galleries change
   useEffect(() => {
     const allItems = convertGalleriesToItems(galleries);
-    
+
     // When selectedCategory is "all", show all items without filtering
     // since the server-side query already handles category filtering correctly
     if (selectedCategory === "all") {
       setItems(allItems);
     } else {
       // Only apply client-side filtering for specific categories
-      const filteredItems = allItems.filter((item) => item.category === selectedCategory);
+      const filteredItems = allItems.filter(
+        (item) => item.category === selectedCategory
+      );
       setItems(filteredItems);
     }
   }, [galleries, selectedCategory, convertGalleriesToItems]);
@@ -198,6 +251,8 @@ export default function MasonryGallery({
           </button>
         ))}
       </div>
+
+      {/* Removed update notification UI */}
 
       {/* Masonry Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
