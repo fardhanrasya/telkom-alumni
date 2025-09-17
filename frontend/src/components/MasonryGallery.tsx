@@ -8,8 +8,10 @@ import {
   GalleryImage,
   getGalleriesPaginated,
   getGalleriesByCategoryPaginated,
+  getUpdatesSince,
 } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
+import { useGalleryUpdates } from "@/hooks/useGalleryUpdates";
 
 interface MasonryGalleryProps {
   initialGalleries: Gallery[];
@@ -39,8 +41,24 @@ export default function MasonryGallery({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(1);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
+
+  // Use gallery updates hook
+  const { hasUpdates, isChecking, updateInfo, resetUpdateState } =
+    useGalleryUpdates({
+      enabled: true,
+      pollingInterval: 30000, // Check every 30 seconds
+      onUpdateDetected: (info) => {
+        setUpdateAvailable(true);
+        console.log("Gallery updates detected:", info);
+      },
+      onError: (error) => {
+        console.error("Update checking error:", error);
+      },
+    });
 
   const categories = [
     { value: "all", label: "Semua" },
@@ -138,17 +156,49 @@ export default function MasonryGallery({
     }
   }, []);
 
+  // Refresh gallery data when updates are available
+  const refreshGalleryData = useCallback(async () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
+    try {
+      let newGalleries: Gallery[] = [];
+
+      if (selectedCategory === "all") {
+        newGalleries = await getGalleriesPaginated(0, ITEMS_PER_PAGE - 1);
+      } else {
+        newGalleries = await getGalleriesByCategoryPaginated(
+          selectedCategory,
+          0,
+          ITEMS_PER_PAGE - 1
+        );
+      }
+
+      setGalleries(newGalleries);
+      setHasMore(newGalleries.length === ITEMS_PER_PAGE);
+      setPage(1);
+      setUpdateAvailable(false);
+      resetUpdateState();
+    } catch (error) {
+      console.error("Error refreshing gallery data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, selectedCategory, resetUpdateState]);
+
   // Convert galleries to items when galleries change
   useEffect(() => {
     const allItems = convertGalleriesToItems(galleries);
-    
+
     // When selectedCategory is "all", show all items without filtering
     // since the server-side query already handles category filtering correctly
     if (selectedCategory === "all") {
       setItems(allItems);
     } else {
       // Only apply client-side filtering for specific categories
-      const filteredItems = allItems.filter((item) => item.category === selectedCategory);
+      const filteredItems = allItems.filter(
+        (item) => item.category === selectedCategory
+      );
       setItems(filteredItems);
     }
   }, [galleries, selectedCategory, convertGalleriesToItems]);
@@ -198,6 +248,51 @@ export default function MasonryGallery({
           </button>
         ))}
       </div>
+
+      {/* Update Notification */}
+      {updateAvailable && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-blue-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700">
+                  Galeri baru tersedia!{" "}
+                  {updateInfo?.affectedGalleries.length || 0} item telah
+                  diperbarui.
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={refreshGalleryData}
+                disabled={refreshing}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium disabled:opacity-50"
+              >
+                {refreshing ? "Memuat..." : "Perbarui"}
+              </button>
+              <button
+                onClick={() => setUpdateAvailable(false)}
+                className="text-blue-600 hover:text-blue-800 px-2 py-1 text-sm"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Masonry Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
