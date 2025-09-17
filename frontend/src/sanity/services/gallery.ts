@@ -63,11 +63,53 @@ export async function getGalleriesPaginated(
   start: number = 0,
   end: number = 11
 ): Promise<Gallery[]> {
-  return await client.fetch(galleryPaginatedQuery, { start, end });
+  // During build time or server-side rendering, use direct client calls
+  if (typeof window === 'undefined') {
+    return await client.fetch(galleryPaginatedQuery, { start, end });
+  }
+  
+  // Client-side: use API route
+  try {
+    const page = Math.floor(start / 12) + 1;
+    const limit = end - start + 1;
+    const response = await fetch(
+      `/api/galeri?page=${page}&limit=${limit}&action=list`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch galleries");
+    }
+
+    const data = await response.json();
+    return data.galleries || [];
+  } catch (error) {
+    console.error("Error fetching paginated galleries:", error);
+    // Fallback to direct client call if API fails
+    return await client.fetch(galleryPaginatedQuery, { start, end });
+  }
 }
 
 export async function getGalleriesCount(): Promise<number> {
-  return await client.fetch(galleryCountQuery);
+  // During build time or server-side rendering, use direct client calls
+  if (typeof window === 'undefined') {
+    return await client.fetch(galleryCountQuery);
+  }
+  
+  // Client-side: use API route
+  try {
+    const response = await fetch("/api/galeri?action=count");
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch galleries count");
+    }
+
+    const data = await response.json();
+    return data.count || 0;
+  } catch (error) {
+    console.error("Error fetching galleries count:", error);
+    // Fallback to direct client call if API fails
+    return await client.fetch(galleryCountQuery);
+  }
 }
 
 export async function getGalleriesByCategoryPaginated(
@@ -75,7 +117,30 @@ export async function getGalleriesByCategoryPaginated(
   start: number = 0,
   end: number = 11
 ): Promise<Gallery[]> {
-  return await client.fetch(galleryByCategoryQuery, { category, start, end });
+  // During build time or server-side rendering, use direct client calls
+  if (typeof window === 'undefined') {
+    return await client.fetch(galleryByCategoryQuery, { category, start, end });
+  }
+  
+  // Client-side: use API route
+  try {
+    const page = Math.floor(start / 12) + 1;
+    const limit = end - start + 1;
+    const response = await fetch(
+      `/api/galeri?page=${page}&limit=${limit}&category=${category}&action=list`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch galleries by category");
+    }
+
+    const data = await response.json();
+    return data.galleries || [];
+  } catch (error) {
+    console.error("Error fetching galleries by category:", error);
+    // Fallback to direct client call if API fails
+    return await client.fetch(galleryByCategoryQuery, { category, start, end });
+  }
 }
 
 export async function getGalleriesByCategoryCount(
@@ -86,9 +151,30 @@ export async function getGalleriesByCategoryCount(
 
 // Timestamp tracking functions
 export async function getLastUpdateTimestamp(): Promise<number> {
-  const query = `*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
-  const lastUpdate = await client.fetch(query);
-  return lastUpdate ? new Date(lastUpdate).getTime() : 0;
+  // During build time or server-side rendering, use direct client calls
+  if (typeof window === 'undefined') {
+    const query = `*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
+    const lastUpdate = await client.fetch(query);
+    return lastUpdate ? new Date(lastUpdate).getTime() : 0;
+  }
+  
+  // Client-side: use API route
+  try {
+    const response = await fetch("/api/galeri?action=lastUpdate");
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch last update timestamp");
+    }
+
+    const data = await response.json();
+    return data.lastUpdate || 0;
+  } catch (error) {
+    console.error("Error fetching last update timestamp:", error);
+    // Fallback to direct client call if API fails
+    const query = `*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
+    const lastUpdate = await client.fetch(query);
+    return lastUpdate ? new Date(lastUpdate).getTime() : 0;
+  }
 }
 
 export async function checkForUpdates(lastKnown: number): Promise<boolean> {

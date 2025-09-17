@@ -5,13 +5,6 @@ export const client = createClient({
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
   apiVersion: "2024-01-01",
   useCdn: false,
-  // Tambahkan token untuk akses API
-  token: process.env.NEXT_PUBLIC_SANITY_TOKEN,
-  // Pastikan untuk menambahkan `stega` untuk menghindari masalah CORS di development
-  stega: {
-    enabled: false, // Nonaktifkan stega untuk development
-    studioUrl: '/studio'
-  },
-  // Nonaktifkan CORS warning di development
-  ignoreBrowserTokenWarning: true
+  // Use server-side token for build time and API routes
+  token: process.env.SANITY_TOKEN || process.env.NEXT_PUBLIC_SANITY_TOKEN,
 });

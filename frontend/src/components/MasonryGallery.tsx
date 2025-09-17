@@ -39,6 +39,7 @@ export default function MasonryGallery({
   const [items, setItems] = useState<MasonryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(1);
   const [lastUpdate, setLastUpdate] = useState<number>(0);
@@ -71,7 +72,7 @@ export default function MasonryGallery({
         gallery.images.forEach((img: GalleryImage, index: number) => {
           allItems.push({
             id: `${gallery._id}-${index}`,
-            src: urlFor(img.image.asset)?.width(400).quality(80).url() ?? "",
+            src: urlFor(img.image.asset)?.width(400).quality(80).url() || "",
             alt: img.alt,
             width: img.image.asset.metadata.dimensions.width,
             height: img.image.asset.metadata.dimensions.height,
@@ -248,6 +249,22 @@ export default function MasonryGallery({
           </button>
         ))}
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-center">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              handleCategoryChange(selectedCategory);
+            }}
+            className="mt-2 mx-auto block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      )}
 
       {/* Masonry Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
