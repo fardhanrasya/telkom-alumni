@@ -479,5 +479,8 @@ export async function generateMetadata({
       description: description,
       images: [imageUrl],
     },
+    alternates: {
+      canonical: `/berita/${resolvedParams.slug}`,
+    },
   };
 }

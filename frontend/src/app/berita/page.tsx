@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import Pagination from "@/components/Pagination";
-import { Metadata } from "next";
 
 // Interface untuk data berita
 interface NewsTag {

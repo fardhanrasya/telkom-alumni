@@ -80,6 +80,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: description,
       images: [companyLogo],
     },
+    alternates: {
+      canonical: `/karir/${params.slug}`,
+    },
   };
 }
 

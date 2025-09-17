@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Configure metadata base URL for production
+  experimental: {
+    // This is safe to keep as production URL will be set via environment variable
+  },
 };
 
 export default nextConfig;

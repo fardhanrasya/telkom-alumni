@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import Pagination from "@/components/Pagination";
 import { urlFor } from "@/sanity/utils";
-import { Metadata } from "next";
 
 // Interface untuk data lowongan
 interface Job {
