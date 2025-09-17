@@ -8,8 +8,6 @@ import {
   GalleryImage,
   getGalleriesPaginated,
   getGalleriesByCategoryPaginated,
-  getLastUpdateTimestamp,
-  checkForUpdates,
 } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
 
@@ -42,18 +40,17 @@ export default function MasonryGallery({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(1);
-  const [lastUpdate, setLastUpdate] = useState<number>(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
 
-  // On mount, get the last update timestamp
-  useEffect(() => {
-    async function fetchLastUpdate() {
-      const ts = await getLastUpdateTimestamp();
-      setLastUpdate(ts);
-    }
-    fetchLastUpdate();
-  }, []);
+  // Removed polling functionality - no need to track last update
+  // useEffect(() => {
+  //   async function fetchLastUpdate() {
+  //     const ts = await getLastUpdateTimestamp();
+  //     setLastUpdate(ts);
+  //   }
+  //   fetchLastUpdate();
+  // }, []);
 
   const categories = [
     { value: "all", label: "Semua" },
@@ -151,41 +148,18 @@ export default function MasonryGallery({
     }
   }, []);
 
-  // Only refresh if there is an update
-  const refreshGalleryDataIfUpdated = useCallback(async () => {
-    try {
-      const currentLastUpdate = await getLastUpdateTimestamp();
-      if (currentLastUpdate > lastUpdate) {
-        setLoading(true);
-        let newGalleries: Gallery[] = [];
-        if (selectedCategory === "all") {
-          newGalleries = await getGalleriesPaginated(0, ITEMS_PER_PAGE - 1);
-        } else {
-          newGalleries = await getGalleriesByCategoryPaginated(
-            selectedCategory,
-            0,
-            ITEMS_PER_PAGE - 1
-          );
-        }
-        setGalleries(newGalleries);
-        setHasMore(newGalleries.length === ITEMS_PER_PAGE);
-        setPage(1);
-        setLastUpdate(currentLastUpdate);
-      }
-    } catch (error) {
-      console.error("Error checking or refreshing gallery data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCategory, lastUpdate]);
+  // Removed auto-refresh functionality - data updates only on page refresh
+  // const refreshGalleryDataIfUpdated = useCallback(async () => {
+  //   // Auto-polling removed for better performance
+  // }, [selectedCategory, lastUpdate]);
 
-  // Auto-check for updates every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshGalleryDataIfUpdated();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [refreshGalleryDataIfUpdated]);
+  // Removed auto-check for updates - no more polling
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     refreshGalleryDataIfUpdated();
+  //   }, 30000);
+  //   return () => clearInterval(interval);
+  // }, [refreshGalleryDataIfUpdated]);
 
   // Convert galleries to items when galleries change
   useEffect(() => {

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Build filter conditions
-    let filterConditions = [`_type == "gallery"`];
+    let filterConditions = [`_type == "gallery"`, `!(_id in path("drafts.**"))`];
 
     if (category && category !== "all") {
       filterConditions.push(`category == "${category}"`);
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ count: totalItems });
 
       case "lastUpdate":
-        const lastUpdateQuery = groq`*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
+        const lastUpdateQuery = groq`*[_type == "gallery" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`;
         const lastUpdate = await client.fetch(lastUpdateQuery);
         const timestamp = lastUpdate ? new Date(lastUpdate).getTime() : 0;
         return NextResponse.json({ lastUpdate: timestamp });

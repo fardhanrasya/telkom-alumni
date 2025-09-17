@@ -1,7 +1,7 @@
 import { groq } from "next-sanity";
 
 export const galleryQuery = groq`
-  *[_type == "gallery"] | order(publishedAt desc) {
+  *[_type == "gallery" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id,
     _updatedAt,
     _createdAt,
@@ -31,7 +31,7 @@ export const galleryQuery = groq`
 `;
 
 export const galleryPaginatedQuery = groq`
-  *[_type == "gallery"] | order(publishedAt desc) [$start...$end] {
+  *[_type == "gallery" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
     _id,
     _updatedAt,
     _createdAt,
@@ -61,11 +61,11 @@ export const galleryPaginatedQuery = groq`
 `;
 
 export const galleryCountQuery = groq`
-  count(*[_type == "gallery"])
+  count(*[_type == "gallery" && !(_id in path("drafts.**"))])
 `;
 
 export const galleryBySlugQuery = groq`
-  *[_type == "gallery" && slug.current == $slug][0] {
+  *[_type == "gallery" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
     _id,
     _updatedAt,
     _createdAt,
@@ -95,7 +95,7 @@ export const galleryBySlugQuery = groq`
 `;
 
 export const galleryByCategoryQuery = groq`
-  *[_type == "gallery" && category == $category] | order(publishedAt desc) [$start...$end] {
+  *[_type == "gallery" && category == $category && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
     _id,
     _updatedAt,
     _createdAt,
@@ -125,11 +125,11 @@ export const galleryByCategoryQuery = groq`
 `;
 
 export const galleryByCategoryCountQuery = groq`
-  count(*[_type == "gallery" && category == $category])
+  count(*[_type == "gallery" && category == $category && !(_id in path("drafts.**"))])
 `;
 
 export const featuredGalleryQuery = groq`
-  *[_type == "gallery" && featured == true] | order(publishedAt desc) {
+  *[_type == "gallery" && featured == true && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id,
     _updatedAt,
     _createdAt,

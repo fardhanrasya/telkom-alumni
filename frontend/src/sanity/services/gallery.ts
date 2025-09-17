@@ -153,7 +153,7 @@ export async function getGalleriesByCategoryCount(
 export async function getLastUpdateTimestamp(): Promise<number> {
   // During build time or server-side rendering, use direct client calls
   if (typeof window === 'undefined') {
-    const query = `*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
+    const query = `*[_type == "gallery" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`;
     const lastUpdate = await client.fetch(query);
     return lastUpdate ? new Date(lastUpdate).getTime() : 0;
   }
@@ -171,7 +171,7 @@ export async function getLastUpdateTimestamp(): Promise<number> {
   } catch (error) {
     console.error("Error fetching last update timestamp:", error);
     // Fallback to direct client call if API fails
-    const query = `*[_type == "gallery"] | order(_updatedAt desc)[0]._updatedAt`;
+    const query = `*[_type == "gallery" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`;
     const lastUpdate = await client.fetch(query);
     return lastUpdate ? new Date(lastUpdate).getTime() : 0;
   }
@@ -242,7 +242,7 @@ export interface UpdateInfo {
 export async function checkForUpdatesDetailed(
   lastKnown: number
 ): Promise<UpdateInfo> {
-  const query = `*[_type == "gallery" && _updatedAt > $lastKnown] {
+  const query = `*[_type == "gallery" && !(_id in path("drafts.**")) && _updatedAt > $lastKnown] {
     _id,
     _updatedAt,
     slug,
@@ -264,7 +264,7 @@ export async function checkForUpdatesDetailed(
 }
 
 export async function getUpdatesSince(timestamp: number): Promise<Gallery[]> {
-  const query = `*[_type == "gallery" && _updatedAt > $timestamp] | order(_updatedAt desc) {
+  const query = `*[_type == "gallery" && !(_id in path("drafts.**")) && _updatedAt > $timestamp] | order(_updatedAt desc) {
     _id,
     _updatedAt,
     _createdAt,
