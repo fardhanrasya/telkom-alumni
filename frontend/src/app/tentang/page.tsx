@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/Button";
 import Contributors from "@/components/Contributors";
 import { Metadata } from "next";
 

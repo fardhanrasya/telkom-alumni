@@ -27,10 +27,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AcaraLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+
+interface AcaraLayoutProps {
+  readonly children: React.ReactNode;
+}
+
+export default function AcaraLayout({ children }: AcaraLayoutProps) {
   return <>{children}</>;
 }
+

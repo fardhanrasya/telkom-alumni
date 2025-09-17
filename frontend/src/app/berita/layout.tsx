@@ -27,10 +27,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BeritaLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface BeritaLayoutProps {
+  readonly children: React.ReactNode;
+}
+
+export default function BeritaLayout({ children }: BeritaLayoutProps) {
   return <>{children}</>;
 }
+
