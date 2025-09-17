@@ -141,12 +141,16 @@ export default function MasonryGallery({
   // Convert galleries to items when galleries change
   useEffect(() => {
     const allItems = convertGalleriesToItems(galleries);
-    const filteredItems =
-      selectedCategory === "all"
-        ? allItems
-        : allItems.filter((item) => item.category === selectedCategory);
-
-    setItems(filteredItems);
+    
+    // When selectedCategory is "all", show all items without filtering
+    // since the server-side query already handles category filtering correctly
+    if (selectedCategory === "all") {
+      setItems(allItems);
+    } else {
+      // Only apply client-side filtering for specific categories
+      const filteredItems = allItems.filter((item) => item.category === selectedCategory);
+      setItems(filteredItems);
+    }
   }, [galleries, selectedCategory, convertGalleriesToItems]);
 
   // Intersection Observer for infinite scroll
