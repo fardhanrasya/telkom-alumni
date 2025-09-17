@@ -12,7 +12,6 @@ import {
   checkForUpdates,
 } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
-// Removed: import { useGalleryUpdates } from "@/hooks/useGalleryUpdates";
 
 interface MasonryGalleryProps {
   initialGalleries: Gallery[];
@@ -54,8 +53,6 @@ export default function MasonryGallery({
     }
     fetchLastUpdate();
   }, []);
-
-  // Removed: useGalleryUpdates hook and related logic
 
   const categories = [
     { value: "all", label: "Semua" },
@@ -251,8 +248,6 @@ export default function MasonryGallery({
           </button>
         ))}
       </div>
-
-      {/* Removed update notification UI */}
 
       {/* Masonry Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">

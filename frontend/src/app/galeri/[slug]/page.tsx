@@ -10,9 +10,6 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// Configure ISR with 30-second revalidation as fallback
-export const revalidate = 30;
-
 export async function generateStaticParams() {
   const galleries = await getAllGalleries();
   return galleries.map((gallery) => ({
