@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
       type: "article",
       images:
-        gallery.images.length > 0
+        gallery.images.length > 0 && gallery.images[0].image.asset
           ? [
               {
                 url:
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
       images:
-        gallery.images.length > 0
+        gallery.images.length > 0 && gallery.images[0].image.asset
           ? [
               urlFor(gallery.images[0].image.asset)
                 ?.width(1200)
@@ -140,31 +140,33 @@ export default async function GaleriDetailPage({ params }: Props) {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-            {gallery.images.map((img, index) => (
-              <div key={index} className="break-inside-avoid mb-6">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <Image
-                    src={
-                      urlFor(img.image.asset)?.width(600).quality(85).url() ||
-                      ""
-                    }
-                    alt={img.alt}
-                    width={600}
-                    height={
-                      (600 * img.image.asset.metadata.dimensions.height) /
-                      img.image.asset.metadata.dimensions.width
-                    }
-                    className="w-full h-auto object-cover"
-                    loading="lazy"
-                  />
-                  {img.caption && (
-                    <div className="p-4">
-                      <p className="text-sm text-gray-600">{img.caption}</p>
-                    </div>
-                  )}
+            {gallery.images
+              .filter((img) => img.image.asset) // Filter out images with null assets
+              .map((img, index) => (
+                <div key={index} className="break-inside-avoid mb-6">
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <Image
+                      src={
+                        urlFor(img.image.asset)?.width(600).quality(85).url() ||
+                        ""
+                      }
+                      alt={img.alt}
+                      width={600}
+                      height={
+                        (600 * img.image.asset.metadata.dimensions.height) /
+                        img.image.asset.metadata.dimensions.width
+                      }
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                    {img.caption && (
+                      <div className="p-4">
+                        <p className="text-sm text-gray-600">{img.caption}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </section>
