@@ -174,7 +174,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const resolvedParams = await params;
 
   // Get the current URL for sharing
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://alumni-smktelkom.vercel.app';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://telkom-alumni.vercel.app";
   const currentUrl = `${baseUrl}/berita/${resolvedParams.slug}`;
 
   // Mengambil data berita berdasarkan slug

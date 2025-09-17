@@ -6,7 +6,7 @@ import {
 import MasonryGallery from "@/components/MasonryGallery";
 
 export const metadata: Metadata = {
-  title: "Galeri - SMK Telkom Jakarta",
+  title: "Galeri | SMK Telkom Jakarta",
   description:
     "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta",
 };

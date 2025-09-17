@@ -9,7 +9,7 @@ export default defineType({
       name: 'title',
       title: 'Page Title',
       type: 'string',
-      initialValue: 'Galeri - SMK Telkom Jakarta',
+      initialValue: 'Galeri | SMK Telkom Jakarta',
     }),
     defineField({
       name: 'description',
