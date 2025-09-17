@@ -18,7 +18,7 @@ export default function SocialShareButtons({
   // Encode text for URLs
   const encodedTitle = encodeURIComponent(title);
   const encodedUrl = encodeURIComponent(url);
-  const encodedDescription = encodeURIComponent(description || title);
+  const encodedDescription = encodeURIComponent(description ?? title);
 
   // Share URLs for different platforms
   const shareUrls = {

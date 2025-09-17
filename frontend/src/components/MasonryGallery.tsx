@@ -59,7 +59,7 @@ export default function MasonryGallery({
         gallery.images.forEach((img: GalleryImage, index: number) => {
           allItems.push({
             id: `${gallery._id}-${index}`,
-            src: urlFor(img.image.asset)?.width(400).quality(80).url() || "",
+            src: urlFor(img.image.asset)?.width(400).quality(80).url() ?? "",
             alt: img.alt,
             width: img.image.asset.metadata.dimensions.width,
             height: img.image.asset.metadata.dimensions.height,

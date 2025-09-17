@@ -30,14 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${gallery.title} - Galeri SMK Telkom Jakarta`,
     description:
-      gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
+      gallery.description ?? `Galeri ${gallery.title} SMK Telkom Jakarta`,
     openGraph: {
       title: `${gallery.title} - Galeri SMK Telkom Jakarta`,
-      description: gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
+      description: gallery.description ?? `Galeri ${gallery.title} SMK Telkom Jakarta`,
       type: "article",
       images: gallery.images.length > 0 ? [
         {
-          url: urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() || "/galeri-hero.jpg",
+          url: urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() ?? "/galeri-hero.jpg",
           width: 1200,
           height: 630,
           alt: gallery.images[0].alt || gallery.title,
@@ -54,9 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `${gallery.title} - Galeri SMK Telkom Jakarta`,
-      description: gallery.description || `Galeri ${gallery.title} SMK Telkom Jakarta`,
+      description: gallery.description ?? `Galeri ${gallery.title} SMK Telkom Jakarta`,
       images: gallery.images.length > 0 ? [
-        urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() || "/galeri-hero.jpg"
+        urlFor(gallery.images[0].image.asset)?.width(1200).quality(85).url() ?? "/galeri-hero.jpg"
       ] : ["/galeri-hero.jpg"],
     },
     alternates: {
@@ -127,7 +127,7 @@ export default async function GaleriDetailPage({ params }: Props) {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                   <Image
                     src={
-                      urlFor(img.image.asset)?.width(600).quality(85).url() ||
+                      urlFor(img.image.asset)?.width(600).quality(85).url() ??
                       ""
                     }
                     alt={img.alt}
