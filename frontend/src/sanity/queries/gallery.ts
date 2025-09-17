@@ -3,6 +3,8 @@ import { groq } from "next-sanity";
 export const galleryQuery = groq`
   *[_type == "gallery"] | order(publishedAt desc) {
     _id,
+    _updatedAt,
+    _createdAt,
     title,
     slug,
     description,
@@ -31,6 +33,8 @@ export const galleryQuery = groq`
 export const galleryPaginatedQuery = groq`
   *[_type == "gallery"] | order(publishedAt desc) [$start...$end] {
     _id,
+    _updatedAt,
+    _createdAt,
     title,
     slug,
     description,
@@ -63,6 +67,8 @@ export const galleryCountQuery = groq`
 export const galleryBySlugQuery = groq`
   *[_type == "gallery" && slug.current == $slug][0] {
     _id,
+    _updatedAt,
+    _createdAt,
     title,
     slug,
     description,
@@ -91,6 +97,8 @@ export const galleryBySlugQuery = groq`
 export const galleryByCategoryQuery = groq`
   *[_type == "gallery" && category == $category] | order(publishedAt desc) [$start...$end] {
     _id,
+    _updatedAt,
+    _createdAt,
     title,
     slug,
     description,
@@ -123,6 +131,8 @@ export const galleryByCategoryCountQuery = groq`
 export const featuredGalleryQuery = groq`
   *[_type == "gallery" && featured == true] | order(publishedAt desc) {
     _id,
+    _updatedAt,
+    _createdAt,
     title,
     slug,
     description,
