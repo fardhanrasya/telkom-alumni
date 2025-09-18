@@ -18,16 +18,8 @@ import { PortableText } from "@portabletext/react";
 // Definisikan tipe params sesuai dengan yang diharapkan Next.js
 type EventDetailPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-// Interface untuk lokasi acara
-interface LocationObject {
-  name: string;
-  address?: string;
-  city?: string;
-  mapLink?: string;
-}
 
 // Interface untuk speaker acara
 interface Speaker {
@@ -40,24 +32,6 @@ interface Speaker {
       _ref: string;
     };
   };
-}
-
-// Interface untuk detail acara
-interface EventDetail {
-  _id: string;
-  title: string;
-  slug: {
-    current: string;
-  };
-  startDate: string;
-  endDate?: string;
-  location: string | LocationObject;
-  isVirtual: boolean;
-  virtualLink?: string;
-  imageUrl?: string;
-  description: any; // Bisa string atau portable text
-  speakers?: Speaker[];
-  registrationLink?: string;
 }
 
 // Fungsi untuk mendapatkan data acara dari server-side

@@ -165,7 +165,7 @@ const portableTextComponents: PortableTextComponents = {
 // Definisikan tipe params sesuai dengan yang diharapkan Next.js
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {

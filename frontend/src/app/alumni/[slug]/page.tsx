@@ -100,8 +100,8 @@ async function getAlumniData(slug: string) {
 
 // Definisikan tipe params sesuai dengan yang diharapkan Next.js
 type AlumniDetailPageProps = {
-  params: { slug: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 // Helper function to extract text from bio
@@ -128,9 +128,12 @@ function getBioText(bio: any): string {
 export async function generateMetadata({
   params,
 }: AlumniDetailPageProps): Promise<Metadata> {
+  // Await params before using its properties
+  const resolvedParams = await params;
+
   // Fetch alumni data
   const alumni = await client.fetch(getAlumniBySlugQuery, {
-    slug: params.slug,
+    slug: resolvedParams.slug,
   });
 
   if (!alumni) {
@@ -185,7 +188,7 @@ export async function generateMetadata({
       images: [alumni.profileImageUrl || "/alumni-hero.jpg"],
     },
     alternates: {
-      canonical: `/alumni/${params.slug}`,
+      canonical: `/alumni/${resolvedParams.slug}`,
     },
     // Add structured data for Person
     other: {
@@ -227,8 +230,11 @@ export async function generateMetadata({
 export default async function AlumniDetailPage({
   params,
 }: AlumniDetailPageProps) {
+  // Await params before using its properties
+  const resolvedParams = await params;
+
   const alumni = await client.fetch(getAlumniBySlugQuery, {
-    slug: params.slug,
+    slug: resolvedParams.slug,
   });
 
   if (!alumni) {

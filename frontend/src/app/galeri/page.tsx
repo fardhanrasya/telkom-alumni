@@ -106,9 +106,6 @@ const ITEMS_PER_PAGE = 10;
 // Configure ISR with 30-second revalidation as fallback
 export const revalidate = 30;
 
-// Add revalidation tags for cache invalidation
-export const tags = ["gallery"];
-
 export default async function GaleriPage() {
   // Get initial images server-side with same logic as API
   const {

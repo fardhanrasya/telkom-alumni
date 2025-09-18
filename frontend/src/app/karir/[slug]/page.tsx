@@ -36,7 +36,7 @@ interface JobDetail {
 // Definisikan tipe params sesuai dengan yang diharapkan Next.js
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 async function getJobDetail(slug: string): Promise<JobDetail | null> {
@@ -60,7 +60,7 @@ export default async function JobDetailPage({ params }: Props) {
     typeof job.company === "string" ? job.company : job.company.name;
   const companyLogo =
     typeof job.company !== "string" && job.company.logo
-      ? urlFor(job.company.logo)?.url()
+      ? urlFor(job.company.logo)?.url() || null
       : null;
 
   const salaryRangeText =
@@ -88,11 +88,7 @@ export default async function JobDetailPage({ params }: Props) {
                 requirements={job.requirements}
               />
 
-              <JobSidebar
-                job={job}
-                salaryRangeText={salaryRangeText}
-                companyName={companyName}
-              />
+              <JobSidebar job={job} salaryRangeText={salaryRangeText} />
             </div>
           </div>
         </div>
@@ -219,11 +215,9 @@ function ContentSection({ title, content }: { title: string; content: any }) {
 function JobSidebar({
   job,
   salaryRangeText,
-  companyName,
 }: {
   job: JobDetail;
   salaryRangeText: string;
-  companyName: string;
 }) {
   return (
     <div>

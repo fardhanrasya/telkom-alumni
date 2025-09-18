@@ -67,7 +67,7 @@ const BeritaContent = () => {
     pageParam ? parseInt(pageParam) : 1
   );
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+
   const [itemsPerPage] = useState(9); // Jumlah item per halaman
 
   // State untuk filter
@@ -90,10 +90,10 @@ const BeritaContent = () => {
   });
 
   // Fungsi untuk mengambil data berita menggunakan API route
-const handleFeaturedNews = async (regularNews: News[]) => {
+  const handleFeaturedNews = async (regularNews: News[]) => {
     try {
       const featuredResponse = await fetch("/api/berita/featured");
-      
+
       if (featuredResponse.ok) {
         const featuredResult = await featuredResponse.json();
         if (featuredResult.news?.length > 0) {
@@ -101,23 +101,24 @@ const handleFeaturedNews = async (regularNews: News[]) => {
           return;
         }
       }
-      
-      const featured = regularNews.find((item: News) => item.featured) || regularNews[0];
+
+      const featured =
+        regularNews.find((item: News) => item.featured) || regularNews[0];
       setFeaturedNews(featured);
     } catch (error) {
       console.error("Error mengambil berita unggulan:", error);
-      const featured = regularNews.find((item: News) => item.featured) || regularNews[0];
+      const featured =
+        regularNews.find((item: News) => item.featured) || regularNews[0];
       setFeaturedNews(featured);
     }
   };
 
-  
   const fetchNews = async (
     page: number,
     filters: { searchTerm?: string; tag?: string; year?: string }
   ) => {
     setLoading(true);
-    
+
     try {
       // Paramater optimizedd
       const queryParams = new URLSearchParams({
@@ -125,7 +126,7 @@ const handleFeaturedNews = async (regularNews: News[]) => {
         limit: itemsPerPage.toString(),
         ...(filters.searchTerm && { search: filters.searchTerm }),
         ...(filters.tag && { tag: filters.tag }),
-        ...(filters.year && filters.year !== "Semua" && { year: filters.year })
+        ...(filters.year && filters.year !== "Semua" && { year: filters.year }),
       });
 
       const response = await fetch(`/api/berita?${queryParams.toString()}`);
@@ -138,7 +139,6 @@ const handleFeaturedNews = async (regularNews: News[]) => {
 
       setNews(result.news);
       setTotalPages(result.pagination.totalPages);
-      setTotalItems(result.pagination.totalItems);
 
       // OPTIMIZED FEATURED NEWS HANDLING
       if (page === 1) {
@@ -322,7 +322,9 @@ const handleFeaturedNews = async (regularNews: News[]) => {
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        <span className="text-gray-500 sr-only">Tidak ada gambar</span>
+                        <span className="text-gray-500 sr-only">
+                          Tidak ada gambar
+                        </span>
                       </div>
                     )}
                     {featuredNews.featured && (
@@ -590,7 +592,9 @@ const handleFeaturedNews = async (regularNews: News[]) => {
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        <span className="text-gray-500 sr-only">Tidak ada gambar</span>
+                        <span className="text-gray-500 sr-only">
+                          Tidak ada gambar
+                        </span>
                       </div>
                     )}
                   </div>
@@ -678,7 +682,7 @@ const BeritaPage = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Featured news skeleton */}
             <FeaturedNewsSkeleton />
-            
+
             {/* Filter section skeleton */}
             <div className="mb-10 rounded-xl bg-gradient-to-br from-white to-gray-50 p-6 shadow-md border border-gray-100">
               <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
@@ -692,7 +696,7 @@ const BeritaPage = () => {
                 <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
               </div>
             </div>
-            
+
             {/* News grid skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(9)].map((_, index) => (

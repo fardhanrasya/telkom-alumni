@@ -7,6 +7,7 @@ import { urlFor } from "@/sanity/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateStaticParams() {
