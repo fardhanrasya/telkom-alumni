@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Button } from './ui/Button';
+import { cn } from '@/lib/utils';
 
 interface PaginationProps {
   currentPage: number;
