@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     // Handle different actions
     switch (action) {
-      case "images":
+      case "images": {
         // Get ALL galleries and flatten to images for proper pagination
         const allGalleriesQuery = groq`*[${filterQuery}] | order(_createdAt desc) {
           _id,
@@ -142,8 +142,8 @@ export async function GET(request: NextRequest) {
             hasMore: endIndex < allImages.length,
           },
         });
-
-      case "galleries":
+      }
+      case "galleries": {
         // Original gallery pagination (for backward compatibility)
         const offset = (page - 1) * limit;
         const dataQuery = groq`*[${filterQuery}] | order(_updatedAt desc) [${offset}...${offset + limit
@@ -186,23 +186,24 @@ export async function GET(request: NextRequest) {
             hasMore: galleries.length === limit,
           },
         });
-
-      case "count":
+      }
+      case "count": {
         const countQuery = groq`count(*[${filterQuery}])`;
         const totalItems = await client.fetch(countQuery);
         return NextResponse.json({ count: totalItems });
-
-      case "lastUpdate":
+      }
+      case "lastUpdate": {
         const lastUpdateQuery = groq`*[_type == "gallery" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`;
         const lastUpdate = await client.fetch(lastUpdateQuery);
         const timestamp = lastUpdate ? new Date(lastUpdate).getTime() : 0;
         return NextResponse.json({ lastUpdate: timestamp });
-
-      default:
+      }
+      default: {
         return NextResponse.json(
           { error: "Invalid action parameter" },
           { status: 400 }
         );
+      }
     }
   } catch (error) {
     console.error("Error fetching gallery data:", error);
