@@ -11,11 +11,19 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const galleries = await getAllGalleries();
-  return galleries.map((gallery) => ({
-    slug: gallery.slug.current,
-  }));
+  try {
+    const galleries = await getAllGalleries();
+    return galleries.map((gallery) => ({
+      slug: gallery.slug.current,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for galleries:", error);
+    return [];
+  }
 }
+
+// ISR configuration
+export const revalidate = 3600; // Revalidate setiap 1 jam
 
 export default async function GaleriDetailPage({ params }: Props) {
   const { slug } = await params;

@@ -103,8 +103,8 @@ async function getInitialImages(limit: number = 10) {
 
 const ITEMS_PER_PAGE = 10;
 
-// Configure ISR with 30-second revalidation as fallback
-export const revalidate = 30;
+// ISR configuration
+export const revalidate = 3600; // Revalidate setiap 1 jam
 
 export default async function GaleriPage() {
   // Get initial images server-side with same logic as API

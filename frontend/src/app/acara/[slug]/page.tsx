@@ -21,6 +21,21 @@ type EventDetailPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+// Generate static params untuk ISR
+export async function generateStaticParams() {
+  try {
+    const events = await client.fetch(
+      `*[_type == "event" && !(_id in path("drafts.**"))] { slug }`
+    );
+    return events.map((item: any) => ({
+      slug: item.slug.current,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for events:", error);
+    return [];
+  }
+}
+
 // Interface untuk speaker acara
 interface Speaker {
   name: string;

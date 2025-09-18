@@ -8,12 +8,13 @@ import {
   getRelatedNewsQuery,
   getLatestNewsQuery,
   getRecentNewsQuery,
+  getAllNewsQuery,
 } from "@/sanity/queries/newsQueries";
 import { getUpcomingEventsQuery } from "@/sanity/queries/eventQueries";
 import NewsSidebar from "@/components/NewsSidebar";
 import SocialShareButtons from "@/components/SocialShareButtons";
 
-const options = { next: { revalidate: 30 } };
+const options = { next: { revalidate: 3600, tags: ["news"] } };
 
 // Format tanggal untuk tampilan yang lebih baik
 function formatDate(dateString: string) {
@@ -167,6 +168,21 @@ type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+// Generate static params untuk ISR
+export async function generateStaticParams() {
+  try {
+    const news = await client.fetch(
+      `*[_type == "news" && !(_id in path("drafts.**"))] { slug }`
+    );
+    return news.map((item: any) => ({
+      slug: item.slug.current,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for news:", error);
+    return [];
+  }
+}
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   // Await params before using its properties

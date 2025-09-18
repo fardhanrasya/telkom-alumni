@@ -39,6 +39,21 @@ interface Props {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
+// Generate static params untuk ISR
+export async function generateStaticParams() {
+  try {
+    const jobs = await client.fetch(
+      `*[_type == "jobPosting" && !(_id in path("drafts.**"))] { slug }`
+    );
+    return jobs.map((item: any) => ({
+      slug: item.slug.current,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for jobs:", error);
+    return [];
+  }
+}
+
 async function getJobDetail(slug: string): Promise<JobDetail | null> {
   try {
     return await client.fetch(getJobBySlugQuery, { slug });
