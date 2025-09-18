@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import ContributorsSkeleton from "@/components/ContributorsSkeleton";
 
 interface Contributor {
   id: number;
@@ -37,37 +38,12 @@ const Contributors = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="bg-white py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Kontributor Proyek
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-              Para developer yang berkontribusi dalam pengembangan Portal Alumni
-              SMK Telkom Jakarta.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-8 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Loading skeleton */}
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="text-center animate-pulse">
-                <div className="mx-auto h-32 w-32 rounded-full bg-gray-200"></div>
-                <div className="mt-4 h-6 w-24 rounded bg-gray-200 mx-auto"></div>
-                <div className="mt-2 h-4 w-16 rounded bg-gray-200 mx-auto"></div>
-                <div className="mt-2 h-4 w-20 rounded bg-gray-200 mx-auto"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <ContributorsSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="bg-white py-16">
+      <div className="bg-gray-50 py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -104,13 +80,14 @@ const Contributors = () => {
                 rel="noopener noreferrer"
                 className="block"
               >
-                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full transition-transform group-hover:scale-105">
+                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full transition-transform group-hover:scale-105 relative">
                   <Image
                     src={contributor.avatar_url}
                     alt={`${contributor.login} avatar`}
-                    width={128}
-                    height={128}
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                    loading="lazy"
                   />
                 </div>
                 <h3 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
