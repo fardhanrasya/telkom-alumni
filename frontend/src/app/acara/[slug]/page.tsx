@@ -34,7 +34,7 @@ interface Speaker {
   };
 }
 
-// Komponen PortableText yang dipindahkan ke luar komponen utama
+// Komponen PortableText
 const portableTextComponents = {
   block: {
     normal: ({ children }: { children?: React.ReactNode }) => (
