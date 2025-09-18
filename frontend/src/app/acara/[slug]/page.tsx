@@ -52,6 +52,22 @@ const portableTextComponents = {
   },
 };
 
+// Komponen deskripsi acara yang terpisah
+function EventDescription({ description }: { description: any }) {
+  if (typeof description === "string") {
+    return (
+      <p className="whitespace-pre-line text-base leading-relaxed">
+        {description}
+      </p>
+    );
+  }
+  return (
+    <div className="text-base leading-relaxed">
+      <PortableText value={description} components={portableTextComponents} />
+    </div>
+  );
+}
+
 // Fungsi untuk mendapatkan data acara dari server-side
 async function getEventData(slug: string) {
   try {
@@ -248,18 +264,7 @@ export default async function EventDetailPage({
                 Deskripsi Acara
               </h2>
               <div className="prose prose-gray max-w-none rounded-xl bg-gray-50 p-6 text-gray-800">
-                {typeof event.description === "string" ? (
-                  <p className="whitespace-pre-line text-base leading-relaxed">
-                    {event.description}
-                  </p>
-                ) : (
-                  <div className="text-base leading-relaxed">
-                    <PortableText
-                      value={event.description}
-                      components={portableTextComponents}
-                    />
-                  </div>
-                )}
+                <EventDescription description={event.description} />
               </div>
             </div>
 
