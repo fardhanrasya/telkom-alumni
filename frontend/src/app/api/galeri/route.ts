@@ -33,10 +33,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     // Get parameters from URL
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const category = searchParams.get("category") || "";
-    const action = searchParams.get("action") || "images"; // 'images', 'galleries', 'count', 'lastUpdate'
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const limit = parseInt(searchParams.get("limit") ?? "10");
+    const category = searchParams.get("category") ?? "";
+    const action = searchParams.get("action") ?? "images"; // 'images', 'galleries', 'count', 'lastUpdate'
 
     // Build filter conditions
     let filterConditions = [
@@ -146,9 +146,8 @@ export async function GET(request: NextRequest) {
       case "galleries":
         // Original gallery pagination (for backward compatibility)
         const offset = (page - 1) * limit;
-        const dataQuery = groq`*[${filterQuery}] | order(_updatedAt desc) [${offset}...${
-          offset + limit
-        }] {
+        const dataQuery = groq`*[${filterQuery}] | order(_updatedAt desc) [${offset}...${offset + limit
+          }] {
           _id,
           title,
           slug,
