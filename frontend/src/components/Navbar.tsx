@@ -24,10 +24,10 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-12 md:h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="relative h-10 w-10">
+              <div className="relative h-8 w-8 md:h-10 md:w-10">
                 <Image
                   src="/favicon.ico"
                   alt="Logo SMK Telkom Jakarta"
@@ -36,7 +36,7 @@ const Navbar = () => {
                   priority
                 />
               </div>
-              <span className="ml-4 text-xl font-bold text-primary">
+              <span className="ml-2 md:ml-4 text-lg md:text-xl font-bold text-primary">
                 Portal Alumni
               </span>
             </Link>
@@ -61,7 +61,7 @@ const Navbar = () => {
           <div className="flex md:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+              className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-700 hover:bg-gray-100 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
               aria-controls="mobile-menu"
               aria-expanded={isMenuOpen}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -69,7 +69,7 @@ const Navbar = () => {
               <span className="sr-only">Buka menu utama</span>
               {isMenuOpen ? (
                 <svg
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -85,7 +85,7 @@ const Navbar = () => {
                 </svg>
               ) : (
                 <svg
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -158,6 +158,7 @@ const Navbar = () => {
                     ? "bg-primary-50 text-primary"
                     : "text-gray-700 hover:bg-gray-50 hover:text-primary"
                 }`}
+                onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
               </Link>
