@@ -34,6 +34,24 @@ interface Speaker {
   };
 }
 
+// Komponen PortableText yang dipindahkan ke luar komponen utama
+const portableTextComponents = {
+  block: {
+    normal: ({ children }: { children?: React.ReactNode }) => (
+      <p className="mb-4 text-base leading-relaxed">{children}</p>
+    ),
+    h1: ({ children }: { children?: React.ReactNode }) => (
+      <h1 className="mb-4 text-2xl font-bold">{children}</h1>
+    ),
+    h2: ({ children }: { children?: React.ReactNode }) => (
+      <h2 className="mb-3 text-xl font-bold">{children}</h2>
+    ),
+    h3: ({ children }: { children?: React.ReactNode }) => (
+      <h3 className="mb-3 text-lg font-bold">{children}</h3>
+    ),
+  },
+};
+
 // Fungsi untuk mendapatkan data acara dari server-side
 async function getEventData(slug: string) {
   try {
@@ -150,7 +168,7 @@ export default async function EventDetailPage({
                       {formatDate(event.startDate)}
                       {event.endDate &&
                         new Date(event.startDate).toDateString() !==
-                          new Date(event.endDate).toDateString() &&
+                        new Date(event.endDate).toDateString() &&
                         ` - ${formatDate(event.endDate)}`}
                     </p>
                   </div>
@@ -238,30 +256,7 @@ export default async function EventDetailPage({
                   <div className="text-base leading-relaxed">
                     <PortableText
                       value={event.description}
-                      components={{
-                        block: {
-                          normal: ({ children }) => (
-                            <p className="mb-4 text-base leading-relaxed">
-                              {children}
-                            </p>
-                          ),
-                          h1: ({ children }) => (
-                            <h1 className="mb-4 text-2xl font-bold">
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="mb-3 text-xl font-bold">
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="mb-3 text-lg font-bold">
-                              {children}
-                            </h3>
-                          ),
-                        },
-                      }}
+                      components={portableTextComponents}
                     />
                   </div>
                 )}
