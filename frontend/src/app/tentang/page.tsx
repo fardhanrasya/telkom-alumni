@@ -1,33 +1,5 @@
 import React, { Suspense } from "react";
 import Contributors from "@/components/Contributors";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Tentang | Portal Alumni SMK Telkom Jakarta",
-  description: "Tentang Portal Alumni SMK Telkom Jakarta. Pelajari visi, misi, sejarah, dan tujuan komunitas alumni SMK Telkom Jakarta.",
-  openGraph: {
-    title: "Tentang | Portal Alumni SMK Telkom Jakarta",
-    description: "Tentang Portal Alumni SMK Telkom Jakarta. Pelajari visi, misi, sejarah, dan tujuan komunitas alumni.",
-    type: "website",
-    images: [
-      {
-        url: "/tentang-hero.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Tentang SMK Telkom Jakarta",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Tentang SMK Telkom Jakarta",
-    description: "Tentang Portal Alumni SMK Telkom Jakarta.",
-    images: ["/tentang-hero.jpg"],
-  },
-  alternates: {
-    canonical: "/tentang",
-  },
-};
 
 const AboutPage = () => {
   return (

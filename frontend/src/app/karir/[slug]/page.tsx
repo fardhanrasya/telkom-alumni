@@ -1,5 +1,5 @@
 import React from "react";
-import { Metadata } from "next";
+
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { client } from "@/sanity/client";
@@ -35,55 +35,8 @@ interface JobDetail {
 
 // Definisikan tipe params sesuai dengan yang diharapkan Next.js
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
   searchParams?: Record<string, string | string[] | undefined>;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const job = await getJobDetail(params.slug);
-
-  if (!job) {
-    return {
-      title: "Lowongan Tidak Ditemukan | Portal Alumni SMK Telkom Jakarta",
-      description: "Lowongan kerja yang Anda cari tidak ditemukan.",
-    };
-  }
-
-  const companyName =
-    typeof job.company === "string" ? job.company : job.company.name;
-  const description = `Lowongan ${job.title} di ${companyName} - ${job.jobType} ${job.workplaceType}. ${job.description ? `Deskripsi: ${job.description}` : ""}`;
-  const companyLogo =
-    (typeof job.company !== "string" &&
-      job.company?.logo &&
-      urlFor(job.company.logo)?.url()) ||
-    "/karir-hero.jpg";
-
-  return {
-    title: `${job.title} - ${companyName} | Portal Alumni SMK Telkom Jakarta`,
-    description: description,
-    openGraph: {
-      title: `${job.title} - ${companyName} | Portal Alumni SMK Telkom Jakarta`,
-      description: description,
-      type: "article",
-      images: [
-        {
-          url: companyLogo,
-          width: 1200,
-          height: 630,
-          alt: `${job.title} - ${companyName}`,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${job.title} - ${companyName} | Portal Alumni SMK Telkom Jakarta`,
-      description: description,
-      images: [companyLogo],
-    },
-    alternates: {
-      canonical: `/karir/${params.slug}`,
-    },
-  };
 }
 
 async function getJobDetail(slug: string): Promise<JobDetail | null> {
@@ -96,42 +49,46 @@ async function getJobDetail(slug: string): Promise<JobDetail | null> {
 }
 
 export default async function JobDetailPage({ params }: Props) {
-  const job = await getJobDetail(params.slug);
+  const resolvedParams = await params;
+  const job = await getJobDetail(resolvedParams.slug);
 
   if (!job) {
     notFound();
   }
 
-  const companyName = typeof job.company === "string" ? job.company : job.company.name;
-  const companyLogo = typeof job.company !== "string" && job.company.logo 
-    ? urlFor(job.company.logo)?.url() 
-    : null;
+  const companyName =
+    typeof job.company === "string" ? job.company : job.company.name;
+  const companyLogo =
+    typeof job.company !== "string" && job.company.logo
+      ? urlFor(job.company.logo)?.url()
+      : null;
 
-  const salaryRangeText = job.salaryRange && typeof job.salaryRange !== "string" 
-    ? getSalaryRangeText(job.salaryRange)
-    : job.salaryRange as string;
+  const salaryRangeText =
+    job.salaryRange && typeof job.salaryRange !== "string"
+      ? getSalaryRangeText(job.salaryRange)
+      : (job.salaryRange as string);
 
   return (
     <div className="bg-gray-50 py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <BackButton />
-        
+
         <div className="overflow-hidden rounded-lg bg-white shadow">
-          <JobHeader 
-            job={job} 
+          <JobHeader
+            job={job}
             companyName={companyName}
             companyLogo={companyLogo}
           />
-          
+
           <div className="px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <JobContent 
+              <JobContent
                 description={job.description}
                 responsibilities={job.responsibilities}
                 requirements={job.requirements}
               />
-              
-              <JobSidebar 
+
+              <JobSidebar
                 job={job}
                 salaryRangeText={salaryRangeText}
                 companyName={companyName}
@@ -152,8 +109,17 @@ function BackButton() {
         href="/karir"
         className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-dark"
       >
-        <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+        <svg
+          className="mr-2 h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
         </svg>
         Kembali ke Daftar Lowongan
       </a>
@@ -161,10 +127,14 @@ function BackButton() {
   );
 }
 
-function JobHeader({ job, companyName, companyLogo }: { 
-  job: JobDetail; 
-  companyName: string; 
-  companyLogo: string | null; 
+function JobHeader({
+  job,
+  companyName,
+  companyLogo,
+}: {
+  job: JobDetail;
+  companyName: string;
+  companyLogo: string | null;
 }) {
   return (
     <div className="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50">
@@ -183,16 +153,17 @@ function JobHeader({ job, companyName, companyLogo }: {
   );
 }
 
-function CompanyLogo({ companyName, logo }: { companyName: string; logo: string | null }) {
+function CompanyLogo({
+  companyName,
+  logo,
+}: {
+  companyName: string;
+  logo: string | null;
+}) {
   return (
     <div className="relative h-16 w-16 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center">
       {logo ? (
-        <Image
-          src={logo}
-          alt={companyName}
-          className="object-contain"
-          fill
-        />
+        <Image src={logo} alt={companyName} className="object-contain" fill />
       ) : (
         <span className="text-2xl font-bold text-primary">
           {companyName.charAt(0)}
@@ -212,7 +183,11 @@ function ApplyButton({ applyLink }: { applyLink: string }) {
   );
 }
 
-function JobContent({ description, responsibilities, requirements }: {
+function JobContent({
+  description,
+  responsibilities,
+  requirements,
+}: {
   description: any;
   responsibilities?: any;
   requirements?: any;
@@ -220,8 +195,12 @@ function JobContent({ description, responsibilities, requirements }: {
   return (
     <div className="col-span-2 space-y-8">
       <ContentSection title="Deskripsi Pekerjaan" content={description} />
-      {responsibilities && <ContentSection title="Tanggung Jawab" content={responsibilities} />}
-      {requirements && <ContentSection title="Persyaratan" content={requirements} />}
+      {responsibilities && (
+        <ContentSection title="Tanggung Jawab" content={responsibilities} />
+      )}
+      {requirements && (
+        <ContentSection title="Persyaratan" content={requirements} />
+      )}
     </div>
   );
 }
@@ -237,7 +216,11 @@ function ContentSection({ title, content }: { title: string; content: any }) {
   );
 }
 
-function JobSidebar({ job, salaryRangeText, companyName }: {
+function JobSidebar({
+  job,
+  salaryRangeText,
+  companyName,
+}: {
   job: JobDetail;
   salaryRangeText: string;
   companyName: string;
@@ -245,7 +228,9 @@ function JobSidebar({ job, salaryRangeText, companyName }: {
   return (
     <div>
       <div className="rounded-lg bg-gray-50 p-6">
-        <h2 className="text-lg font-medium text-gray-900">Informasi Lowongan</h2>
+        <h2 className="text-lg font-medium text-gray-900">
+          Informasi Lowongan
+        </h2>
         <JobInfoList job={job} salaryRangeText={salaryRangeText} />
         {job.postedBy && <PostedBySection postedBy={job.postedBy} />}
       </div>
@@ -253,17 +238,38 @@ function JobSidebar({ job, salaryRangeText, companyName }: {
   );
 }
 
-function JobInfoList({ job, salaryRangeText }: { job: JobDetail; salaryRangeText: string }) {
+function JobInfoList({
+  job,
+  salaryRangeText,
+}: {
+  job: JobDetail;
+  salaryRangeText: string;
+}) {
   const infoItems = [
     { label: "Jenis Pekerjaan", value: job.jobType },
     { label: "Lokasi Kerja", value: job.workplaceType },
-    ...(salaryRangeText ? [{ label: "Kisaran Gaji", value: salaryRangeText }] : []),
+    ...(salaryRangeText
+      ? [{ label: "Kisaran Gaji", value: salaryRangeText }]
+      : []),
     { label: "Tanggal Publikasi", value: formatDate(job.publishedAt) },
-    ...(job.expiresAt ? [{ label: "Batas Akhir Lamaran", value: formatDate(job.expiresAt) }] : []),
-    ...(job.contactEmail ? [{ 
-      label: "Email Kontak", 
-      value: <a href={`mailto:${job.contactEmail}`} className="text-primary hover:text-primary-dark">{job.contactEmail}</a> 
-    }] : [])
+    ...(job.expiresAt
+      ? [{ label: "Batas Akhir Lamaran", value: formatDate(job.expiresAt) }]
+      : []),
+    ...(job.contactEmail
+      ? [
+          {
+            label: "Email Kontak",
+            value: (
+              <a
+                href={`mailto:${job.contactEmail}`}
+                className="text-primary hover:text-primary-dark"
+              >
+                {job.contactEmail}
+              </a>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -278,7 +284,7 @@ function JobInfoList({ job, salaryRangeText }: { job: JobDetail; salaryRangeText
   );
 }
 
-function PostedBySection({ postedBy }: { postedBy: JobDetail['postedBy'] }) {
+function PostedBySection({ postedBy }: { postedBy: JobDetail["postedBy"] }) {
   if (!postedBy) return null;
 
   return (
@@ -294,7 +300,7 @@ function PostedBySection({ postedBy }: { postedBy: JobDetail['postedBy'] }) {
   );
 }
 
-function Avatar({ postedBy }: { postedBy: JobDetail['postedBy'] }) {
+function Avatar({ postedBy }: { postedBy: JobDetail["postedBy"] }) {
   if (!postedBy) return null;
 
   return (
@@ -320,16 +326,24 @@ function Avatar({ postedBy }: { postedBy: JobDetail['postedBy'] }) {
 }
 
 // Helper function untuk salary range formatting
-function getSalaryRangeText(salaryRange: Exclude<JobDetail['salaryRange'], string | undefined>): string {
-  if (!salaryRange) return '';
-  
+function getSalaryRangeText(
+  salaryRange: Exclude<JobDetail["salaryRange"], string | undefined>
+): string {
+  if (!salaryRange) return "";
+
   if (salaryRange.min && salaryRange.max) {
-    return `${salaryRange.currency || "IDR"} ${salaryRange.min.toLocaleString()} - ${salaryRange.max.toLocaleString()}`;
+    return `${
+      salaryRange.currency || "IDR"
+    } ${salaryRange.min.toLocaleString()} - ${salaryRange.max.toLocaleString()}`;
   } else if (salaryRange.min) {
-    return `${salaryRange.currency || "IDR"} ${salaryRange.min.toLocaleString()}+`;
+    return `${
+      salaryRange.currency || "IDR"
+    } ${salaryRange.min.toLocaleString()}+`;
   } else if (salaryRange.max) {
-    return `Hingga ${salaryRange.currency || "IDR"} ${salaryRange.max.toLocaleString()}`;
+    return `Hingga ${
+      salaryRange.currency || "IDR"
+    } ${salaryRange.max.toLocaleString()}`;
   }
-  
+
   return "Negosiasi";
 }

@@ -1,5 +1,5 @@
 import "./globals.css";
-import { ReactNode } from "react";
+
 import { Metadata } from "next";
 import { getSectionMetadata } from "@/sanity/queries";
 import { Inter } from "next/font/google";
@@ -17,7 +17,9 @@ const inter = Inter({
 export async function generateMetadata(): Promise<Metadata> {
   const meta = await getSectionMetadata("home");
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://telkom-alumni.vercel.app'),
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://telkom-alumni.vercel.app"
+    ),
     title: meta?.title || "Portal Alumni SMK Telkom Jakarta",
     description:
       meta?.description ||
@@ -47,6 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
+export const revalidate = 300;
 
 export default function RootLayout({
   children,

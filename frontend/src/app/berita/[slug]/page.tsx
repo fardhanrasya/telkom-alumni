@@ -12,7 +12,6 @@ import {
 import { getUpcomingEventsQuery } from "@/sanity/queries/eventQueries";
 import NewsSidebar from "@/components/NewsSidebar";
 import SocialShareButtons from "@/components/SocialShareButtons";
-import { Metadata } from "next";
 
 const options = { next: { revalidate: 30 } };
 
@@ -429,58 +428,4 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
       </div>
     </div>
   );
-}
-
-export async function generateMetadata({
-  params,
-}: NewsDetailPageProps): Promise<Metadata> {
-  // Await params before using its properties
-  const resolvedParams = await params;
-
-  const news = await client.fetch<SanityDocument>(
-    getNewsBySlugQuery,
-    resolvedParams,
-    options
-  );
-
-  if (!news) {
-    return {
-      title: "Berita Tidak Ditemukan | Portal Alumni SMK Telkom Jakarta",
-      description: "Berita yang Anda cari tidak ditemukan.",
-    };
-  }
-
-  const description =
-    news.excerpt || `Berita terbaru dari SMK Telkom Jakarta: ${news.title}`;
-  const imageUrl = news.mainImageUrl || "/berita-hero.jpg";
-
-  return {
-    title: `${news.title} | Portal Alumni SMK Telkom Jakarta`,
-    description: description,
-    openGraph: {
-      title: `${news.title} | Portal Alumni SMK Telkom Jakarta`,
-      description: description,
-      type: "article",
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: news.title,
-        },
-      ],
-      publishedTime: news.publishedAt,
-      authors: news.authorName ? [news.authorName] : undefined,
-      tags: news.tags,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${news.title} | Portal Alumni SMK Telkom Jakarta`,
-      description: description,
-      images: [imageUrl],
-    },
-    alternates: {
-      canonical: `/berita/${resolvedParams.slug}`,
-    },
-  };
 }

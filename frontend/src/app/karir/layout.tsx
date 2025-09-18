@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Metadata } from "next";
 import { getSectionMetadata } from "@/sanity/queries";
 

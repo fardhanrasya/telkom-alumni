@@ -29,6 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [meta?.twitterImage || "/alumni-hero.jpg"],
     },
     keywords: meta?.keywords || [],
+    alternates: {
+      canonical: "/alumni",
+    },
   };
 }
 

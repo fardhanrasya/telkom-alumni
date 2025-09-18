@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
 import MasonryGallery from "@/components/MasonryGallery";
@@ -101,36 +100,6 @@ async function getInitialImages(limit: number = 10) {
     totalImages: allImages.length,
   };
 }
-
-export const metadata: Metadata = {
-  title: "Galeri | Portal Alumni SMK Telkom Jakarta",
-  description:
-    "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta. Dokumentasi memori berharga komunitas alumni.",
-  openGraph: {
-    title: "Galeri | Portal Alumni SMK Telkom Jakarta",
-    description:
-      "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
-    type: "website",
-    images: [
-      {
-        url: "/galeri-hero.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Galeri SMK Telkom Jakarta",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Galeri SMK Telkom Jakarta",
-    description:
-      "Kumpulan foto kegiatan, prestasi, dan fasilitas SMK Telkom Jakarta.",
-    images: ["/galeri-hero.jpg"],
-  },
-  alternates: {
-    canonical: "/galeri",
-  },
-};
 
 const ITEMS_PER_PAGE = 10;
 

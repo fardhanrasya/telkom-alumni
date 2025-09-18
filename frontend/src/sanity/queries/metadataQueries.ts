@@ -1,7 +1,14 @@
 import { client } from "../client";
 
 export async function getSectionMetadata(
-  section: "berita" | "karir" | "alumni" | "acara" | "tentang" | "home"
+  section:
+    | "berita"
+    | "karir"
+    | "alumni"
+    | "acara"
+    | "tentang"
+    | "home"
+    | "galeri"
 ) {
   const type = section + "Metadata";
   const query = `

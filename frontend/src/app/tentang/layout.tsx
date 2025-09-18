@@ -29,6 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [meta?.twitterImage || "/tentang-hero.jpg"],
     },
     keywords: meta?.keywords || [],
+    alternates: {
+      canonical: "/tentang",
+    },
   };
 }
 

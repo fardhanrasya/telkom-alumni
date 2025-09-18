@@ -8,10 +8,16 @@ export async function generateMetadata(): Promise<Metadata> {
     title: meta?.title || "Acara & Kegiatan | Portal Alumni SMK Telkom Jakarta",
     description:
       meta?.description ||
-      "Temukan berbagai acara menarik yang diselenggarakan oleh alumni dan SMK Telkom Jakarta. Ikuti networking, workshop, dan kegiatan lainnya.",
+      "Temukan berbagai acara menarik yang diselenggarakan oleh alumni dan SMK Telkom Jakarta. Networking, workshop, dan kegiatan pengembangan karir.",
     openGraph: {
-      title: meta?.ogTitle || meta?.title,
-      description: meta?.ogDescription || meta?.description,
+      title:
+        meta?.ogTitle ||
+        meta?.title ||
+        "Acara & Kegiatan | Portal Alumni SMK Telkom Jakarta",
+      description:
+        meta?.ogDescription ||
+        meta?.description ||
+        "Temukan berbagai acara menarik yang diselenggarakan oleh alumni dan SMK Telkom Jakarta.",
       type: "website",
       images: [
         {
@@ -24,8 +30,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: meta?.twitterTitle || meta?.title,
-      description: meta?.twitterDescription || meta?.description,
+      title:
+        meta?.twitterTitle || meta?.title || "Acara Alumni SMK Telkom Jakarta",
+      description:
+        meta?.twitterDescription ||
+        meta?.description ||
+        "Temukan berbagai acara menarik yang diselenggarakan oleh alumni dan SMK Telkom Jakarta.",
       images: [meta?.twitterImage || "/acara-hero.jpg"],
     },
     keywords: meta?.keywords || [],
