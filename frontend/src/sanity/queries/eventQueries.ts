@@ -2,10 +2,14 @@
  * Query untuk acara dari Sanity
  */
 
-// Query untuk mendapatkan semua acara
+// Query untuk mendapatkan semua acara (hanya yang belum berakhir)
 export const getAllEventsQuery = `*[
   _type == "event"
   && defined(slug.current)
+  && (
+    (defined(endDate) && endDate >= now()) || 
+    (!defined(endDate) && startDate >= now())
+  )
 ]|order(startDate asc){
   _id, 
   title, 
@@ -19,11 +23,14 @@ export const getAllEventsQuery = `*[
   description
 }`;
 
-// Query untuk mendapatkan acara yang akan datang
+// Query untuk mendapatkan acara yang akan datang (belum berakhir)
 export const getUpcomingEventsQuery = (limit: number = 3) => `*[
   _type == "event"
   && defined(slug.current)
-  && startDate > now()
+  && (
+    (defined(endDate) && endDate >= now()) || 
+    (!defined(endDate) && startDate >= now())
+  )
 ]|order(startDate asc)[0...${limit}]{
   _id, 
   title, 

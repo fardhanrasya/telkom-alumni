@@ -113,6 +113,19 @@ export const jobPostingType = defineType({
       title: 'Email Kontak',
       type: 'string',
     }),
+    defineField({
+      name: 'tag',
+      title: 'Jurusan Rekomen',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Rekayasa Perangkat Lunak', value: 'Rekayasa Perangkat Lunak'},
+          {title: 'Teknik Komputer Jaringan', value: 'Teknik Komputer Jaringan'},
+          {title: 'Teknik Jaringan Akses', value: 'Teknik Jaringan Akses'},
+          {title: 'Transmisi', value: 'Rekayasa Perangkat Lunak'},
+        ],
+      },
+    }),
   ],
   preview: {
     select: {
