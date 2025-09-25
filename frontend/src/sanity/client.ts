@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "next-sanity";
 
 export const client = createClient({
@@ -6,5 +7,5 @@ export const client = createClient({
   apiVersion: "2024-01-01",
   useCdn: false,
   // Use server-side token for build time and API routes
-  token: process.env.SANITY_TOKEN || process.env.NEXT_PUBLIC_SANITY_TOKEN,
+  token: process.env.SANITY_TOKEN,
 });

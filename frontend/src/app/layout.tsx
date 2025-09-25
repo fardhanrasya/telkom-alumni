@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: meta?.ogImage || "/home-hero.jpg",
+          url: meta?.ogImage || "/hero-image.jpg",
           width: 1200,
           height: 630,
           alt: meta?.ogImageAlt || "Portal Alumni SMK Telkom Jakarta",
@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: meta?.twitterTitle || meta?.title,
       description: meta?.twitterDescription || meta?.description,
-      images: [meta?.twitterImage || "/home-hero.jpg"],
+      images: [meta?.twitterImage || "/hero-image.jpg"],
     },
     keywords: meta?.keywords || [],
     alternates: {

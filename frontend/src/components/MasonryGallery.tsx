@@ -283,7 +283,7 @@ export default function MasonryGallery({
                   height={(600 * item.height) / item.width}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
-                  unoptimized
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-end">
                   <div className="p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">

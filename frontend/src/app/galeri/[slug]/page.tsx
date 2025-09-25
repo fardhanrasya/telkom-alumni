@@ -6,8 +6,8 @@ import { getGalleryBySlug, getAllGalleries } from "@/sanity/services/gallery";
 import { urlFor } from "@/sanity/utils";
 
 interface Props {
-  params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  params: { slug: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 }
 
 export default async function GaleriDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug } = params;
   const gallery = await getGalleryBySlug(slug);
 
   if (!gallery) {
@@ -93,7 +93,7 @@ export default async function GaleriDetailPage({ params }: Props) {
                     }
                     className="w-full h-auto object-cover"
                     loading="lazy"
-                    unoptimized
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                   {img.caption && (
                     <div className="p-4">
