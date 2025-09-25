@@ -1,6 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 // Tipe data untuk alumni dari Sanity
 export interface Alumni {
@@ -16,6 +16,7 @@ export interface Alumni {
     title?: string;
     company?: string;
   };
+  agreement: boolean;
 }
 
 interface AlumniCardProps {
@@ -26,21 +27,21 @@ const AlumniCard: React.FC<AlumniCardProps> = ({ alumni }) => {
   // Untuk menentukan label jurusan yang benar berdasarkan value dari Sanity
   const getMajorLabel = (majorValue: string) => {
     switch (majorValue) {
-      case 'rpl':
-        return 'Rekayasa Perangkat Lunak';
-      case 'tkj':
-        return 'Teknik Komputer dan Jaringan';
-      case 'mm':
-        return 'Multimedia';
-      case 'tei':
-        return 'Teknik Elektronika Industri';
+      case "rpl":
+        return "Rekayasa Perangkat Lunak";
+      case "tkj":
+        return "Teknik Komputer dan Jaringan";
+      case "mm":
+        return "Multimedia";
+      case "tei":
+        return "Teknik Elektronika Industri";
       default:
         return majorValue;
     }
   };
 
   // Fallback image jika tidak ada gambar profil
-  const imageUrl = alumni.profileImageUrl || '/avatar-placeholder.png';
+  const imageUrl = alumni.profileImageUrl || "/avatar-placeholder.png";
 
   return (
     <Link
@@ -59,13 +60,13 @@ const AlumniCard: React.FC<AlumniCardProps> = ({ alumni }) => {
             priority={false}
           />
         </div>
-        
+
         {/* Gradient Overlay - Lebih soft */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-75" />
-        
+
         {/* Soft shadow untuk teks */}
         <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
-        
+
         {/* Badge tahun lulus */}
         <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
           {alumni.yearGraduated}
@@ -76,11 +77,11 @@ const AlumniCard: React.FC<AlumniCardProps> = ({ alumni }) => {
           <h3 className="mb-1 line-clamp-1 text-lg font-bold group-hover:text-primary-100 transition-colors duration-300">
             {alumni.name}
           </h3>
-          
+
           <p className="mb-2 line-clamp-1 text-sm text-white/80">
             {getMajorLabel(alumni.major)}
           </p>
-          
+
           {alumni.currentJob && (
             <div className="mt-1">
               <div className="flex items-center space-x-1 text-sm">
@@ -89,7 +90,7 @@ const AlumniCard: React.FC<AlumniCardProps> = ({ alumni }) => {
                     {alumni.currentJob.title}
                   </span>
                 )}
-                
+
                 {alumni.currentJob.company && (
                   <>
                     <span className="text-white/70">di</span>

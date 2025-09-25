@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 
-export const alumniType = defineType({
-  name: 'alumni',
-  title: 'Alumni',
+export const daftarType = defineType({
+  name: 'daftar',
+  title: 'Daftar',
   type: 'document',
   fields: [
     defineField({
@@ -15,7 +15,7 @@ export const alumniType = defineType({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      options: {source: 'name'},
+      source: 'name',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -99,6 +99,12 @@ export const alumniType = defineType({
           ],
         },
       ],
+    }),
+    defineField({
+      name: 'evidence',
+      type: 'image',
+      title: 'Bukti Alumni',
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'agreement',

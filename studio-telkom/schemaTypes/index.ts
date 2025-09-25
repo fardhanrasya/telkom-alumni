@@ -3,6 +3,7 @@ import {alumniType} from './alumniType'
 import {eventType} from './eventType'
 import {jobPostingType} from './jobPostingType'
 import {galleryType} from './galleryType'
+import {daftarType} from './daftarType'
 import beritaMetadata from './beritaMetadata'
 import karirMetadata from './karirMetadata'
 import alumniMetadata from './alumniMetadata'
@@ -19,6 +20,7 @@ export const schemaTypes = [
   eventType,
   jobPostingType,
   galleryType,
+  daftarType,
   beritaMetadata,
   karirMetadata,
   alumniMetadata,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
@@ -64,54 +64,57 @@ export default function AlumniContent() {
   });
 
   // Function to fetch alumni data using local API route
-  const fetchAlumni = async (
-    page: number,
-    filters: { searchTerm?: string; major?: string; yearRange?: string }
-  ) => {
-    setLoading(true);
-    try {
-      // Build URL with query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", itemsPerPage.toString());
+  const fetchAlumni = useCallback(
+    async (
+      page: number,
+      filters: { searchTerm?: string; major?: string; yearRange?: string }
+    ) => {
+      setLoading(true);
+      try {
+        // Build URL with query parameters
+        const queryParams = new URLSearchParams();
+        queryParams.append("page", page.toString());
+        queryParams.append("limit", itemsPerPage.toString());
 
-      if (filters.searchTerm) {
-        queryParams.append("search", filters.searchTerm);
+        if (filters.searchTerm) {
+          queryParams.append("search", filters.searchTerm);
+        }
+
+        if (filters.major) {
+          queryParams.append("major", filters.major);
+        }
+
+        if (filters.yearRange) {
+          queryParams.append("year", filters.yearRange);
+        }
+
+        // Call local API route
+        const response = await fetch(`/api/alumni?${queryParams.toString()}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch alumni data");
+        }
+
+        const result = await response.json();
+
+        setAlumni(result.alumni);
+        setTotalPages(result.totalPages);
+        setTotalItems(result.totalItems);
+
+        setLastQuery({
+          searchTerm: filters.searchTerm || "",
+          major: filters.major || "Semua",
+          yearRange: filters.yearRange || "Semua",
+          page,
+        });
+      } catch (error) {
+        console.error("Error fetching alumni data:", error);
+      } finally {
+        setLoading(false);
       }
-
-      if (filters.major) {
-        queryParams.append("major", filters.major);
-      }
-
-      if (filters.yearRange) {
-        queryParams.append("year", filters.yearRange);
-      }
-
-      // Call local API route
-      const response = await fetch(`/api/alumni?${queryParams.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch alumni data");
-      }
-
-      const result = await response.json();
-
-      setAlumni(result.alumni);
-      setTotalPages(result.totalPages);
-      setTotalItems(result.totalItems);
-
-      setLastQuery({
-        searchTerm: filters.searchTerm || "",
-        major: filters.major || "Semua",
-        yearRange: filters.yearRange || "Semua",
-        page,
-      });
-    } catch (error) {
-      console.error("Error fetching alumni data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [itemsPerPage]
+  );
 
   // Function to update URL with filter parameters and page
   const updateURLWithFilters = (filters: {
@@ -151,7 +154,7 @@ export default function AlumniContent() {
       major: majorParam || "Semua",
       yearRange: yearParam || "Semua",
     });
-  }, [pageParam, searchParam, majorParam, yearParam]);
+  }, [pageParam, searchParam, majorParam, yearParam, fetchAlumni]);
 
   // Handler for page change
   const handlePageChange = (page: number) => {

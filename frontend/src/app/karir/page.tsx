@@ -16,6 +16,7 @@ interface Job {
   companyLogoUrl?: string;
   slug: { current: string };
   jobType: string;
+  tag: string;
   workplaceType: string;
   postedAt: string;
 }
@@ -31,6 +32,14 @@ const jobTypes = [
 ];
 const workplaceTypes = ["Semua", "On-site", "Remote", "Hybrid"];
 
+const tag = [
+  "Semua",
+  "Rekayasa Perangkat Lunak",
+  "Teknik Komputer Jaringan",
+  "Teknik Jaringan Akses",
+  "Transmisi",
+];
+
 // Komponen yang menggunakan useSearchParams dibungkus dengan Suspense
 const KarirContent = () => {
   const router = useRouter();
@@ -40,6 +49,7 @@ const KarirContent = () => {
   const pageParam = searchParams.get("page");
   const searchParam = searchParams.get("search");
   const jobTypeParam = searchParams.get("jobType");
+  const tagParam = searchParams.get("tag");
   const workplaceTypeParam = searchParams.get("workplaceType");
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -59,6 +69,7 @@ const KarirContent = () => {
   const [selectedWorkplace, setSelectedWorkplace] = useState(
     workplaceTypeParam || "Semua"
   );
+  const [selectedTag, setSelectedTag] = useState(tagParam || "Semua");
   const [isSearching, setIsSearching] = useState(false);
 
   // State untuk query terakhir yang digunakan
@@ -66,10 +77,12 @@ const KarirContent = () => {
     searchTerm: string;
     jobType: string;
     workplaceType: string;
+    tag: string;
     page: number;
   }>({
     searchTerm: searchParam || "",
     jobType: jobTypeParam || "Semua",
+    tag: tagParam || "Semua",
     workplaceType: workplaceTypeParam || "Semua",
     page: pageParam ? parseInt(pageParam) : 1,
   });
@@ -77,7 +90,12 @@ const KarirContent = () => {
   // Fungsi untuk mengambil data lowongan menggunakan API route lokal
   const fetchJobs = async (
     page: number,
-    filters: { searchTerm?: string; jobType?: string; workplaceType?: string }
+    filters: {
+      searchTerm?: string;
+      jobType?: string;
+      workplaceType?: string;
+      tag?: string;
+    }
   ) => {
     setLoading(true);
     try {
@@ -96,6 +114,9 @@ const KarirContent = () => {
 
       if (filters.workplaceType && filters.workplaceType !== "Semua") {
         queryParams.append("workplaceType", filters.workplaceType);
+      }
+      if (filters.tag && filters.tag !== "Semua") {
+        queryParams.append("tag", filters.tag);
       }
 
       // Panggil API route lokal
@@ -118,6 +139,7 @@ const KarirContent = () => {
         searchTerm: filters.searchTerm || "",
         jobType: filters.jobType || "Semua",
         workplaceType: filters.workplaceType || "Semua",
+        tag: filters.tag || "Semua",
         page,
       });
     } catch (error) {
@@ -133,6 +155,7 @@ const KarirContent = () => {
     search?: string;
     jobType?: string;
     workplaceType?: string;
+    tag?: string;
   }) => {
     const params = new URLSearchParams();
 
@@ -151,6 +174,9 @@ const KarirContent = () => {
     if (filters.workplaceType && filters.workplaceType !== "Semua") {
       params.set("workplaceType", filters.workplaceType);
     }
+    if (filters.tag && filters.tag !== "Semua") {
+      params.set("tag", filters.tag);
+    }
 
     const queryString = params.toString();
     const url = `/karir${queryString ? `?${queryString}` : ""}`;
@@ -168,8 +194,9 @@ const KarirContent = () => {
       searchTerm: searchParam || "",
       jobType: jobTypeParam || "Semua",
       workplaceType: workplaceTypeParam || "Semua",
+      tag: tagParam || "Semua",
     });
-  }, [pageParam, searchParam, jobTypeParam, workplaceTypeParam]);
+  }, [pageParam, searchParam, jobTypeParam, workplaceTypeParam, tagParam]);
 
   // Handler untuk mengubah halaman
   const handlePageChange = (page: number) => {
@@ -184,12 +211,14 @@ const KarirContent = () => {
         lastQuery.workplaceType !== "Semua"
           ? lastQuery.workplaceType
           : undefined,
+      tag: lastQuery.tag !== "Semua" ? lastQuery.tag : undefined,
     });
 
     fetchJobs(page, {
       searchTerm: lastQuery.searchTerm,
       jobType: lastQuery.jobType,
       workplaceType: lastQuery.workplaceType,
+      tag: lastQuery.tag,
     });
 
     // Scroll ke atas halaman saat mengganti halaman
@@ -208,6 +237,7 @@ const KarirContent = () => {
       jobType: selectedJobType !== "Semua" ? selectedJobType : undefined,
       workplaceType:
         selectedWorkplace !== "Semua" ? selectedWorkplace : undefined,
+      tag: lastQuery.tag !== "Semua" ? lastQuery.tag : undefined,
     });
 
     // Jalankan pencarian dengan filter yang dipilih
@@ -215,6 +245,7 @@ const KarirContent = () => {
       searchTerm,
       jobType: selectedJobType,
       workplaceType: selectedWorkplace,
+      tag: selectedTag,
     });
 
     setTimeout(() => {
@@ -237,6 +268,7 @@ const KarirContent = () => {
       searchTerm: "",
       jobType: "Semua",
       workplaceType: "Semua",
+      tag: "Semua",
     });
   };
 
@@ -332,6 +364,27 @@ const KarirContent = () => {
                 onChange={(e) => setSelectedWorkplace(e.target.value)}
               >
                 {workplaceTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="workplace"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Jurusan Spesifik
+              </label>
+              <select
+                id="workplace"
+                className="mt-1 block w-full rounded-md border-gray-300 py-3 shadow-sm focus:border-primary focus:ring-primary text-base text-gray-900"
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+              >
+                {tag.map((type) => (
                   <option key={type} value={type}>
                     {type}
                   </option>
@@ -437,6 +490,12 @@ const KarirContent = () => {
                           </div>
                         </div>
                         <div className="flex w-full flex-wrap items-center gap-4 sm:w-auto">
+                          <span
+                            className={`rounded-full  px-3 py-1 text-xs font-medium ${job.tag === "Rekayasa Perangkat Lunak" ? "text-yellow-400 bg-yellow-50" : job.tag === "Teknik Komputer Jaringan" ? "text-green-400 bg-green-50" : job.tag === "Teknik Jaringan Akses" ? "text-blue-400 bg-blue-50" : "text-primary-400 bg-primary-50"}`}
+                          >
+                            {job.tag}
+                          </span>
+
                           <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary">
                             {job.jobType}
                           </span>
