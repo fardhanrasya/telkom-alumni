@@ -1,13 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client for client-side
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null); // State to hold da user session or sumn
   const pathname = usePathname();
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const navLinks = [
     { href: "/", label: "Beranda" },
@@ -17,6 +46,7 @@ const Navbar = () => {
     { href: "/berita", label: "Berita" },
     { href: "/galeri", label: "Galeri" },
     { href: "/tentang", label: "Tentang" },
+    ...(user ? [{ href: "/forum", label: "Forum" }] : []),
   ];
 
   const isActive = (path: string) => pathname === path;
@@ -56,6 +86,27 @@ const Navbar = () => {
               </Link>
             ))}
           </nav>
+
+          {/* Auth Buttons / Avatar */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <div className="relative">
+                <button className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-semibold">
+                  {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                </button>
+                {/* Dropdown for user actions can be added here */}
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/signin" className="text-sm font-medium text-gray-700 hover:text-primary">
+                  Sign In
+                </Link>
+                <Link href="/auth/signup" className="text-sm font-medium text-white bg-primary px-3 py-1.5 rounded-md hover:bg-primary-dark">
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
 
           {/* Mobile Navigation Toggle */}
           <div className="flex md:hidden">
@@ -163,6 +214,24 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {!user && (
+              <div className="pt-4 border-t border-gray-200">
+                <Link
+                  href="/auth/signin"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-white bg-primary mt-2 hover:bg-primary-dark"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
