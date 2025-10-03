@@ -4,6 +4,149 @@ import { revalidatePath, revalidateTag } from "next/cache";
 // Secret untuk keamanan webhook
 const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET || "your-secret-key";
 
+/**
+ * @swagger
+ * /api/revalidate:
+ *   post:
+ *     summary: Revalidate Next.js paths and tags.
+ *     description: Endpoint to trigger on-demand revalidation for Next.js pages and data tags, typically used with webhooks from a CMS. Requires a secret token for authorization.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - action
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 description: The type of content being revalidated (e.g., 'gallery', 'news', 'alumni', 'event', 'job', 'homepage').
+ *                 enum: [gallery, news, alumni, event, job, homepage]
+ *               slug:
+ *                 type: string
+ *                 description: The slug of the specific content item to revalidate (optional).
+ *               action:
+ *                 type: string
+ *                 description: The action performed (e.g., 'create', 'update', 'delete').
+ *     responses:
+ *       200:
+ *         description: Revalidation successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 revalidated:
+ *                   type: boolean
+ *                   example: true
+ *                 type:
+ *                   type: string
+ *                 slug:
+ *                   type: string
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized. Invalid or missing secret token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       400:
+ *         description: Invalid content type.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Invalid content type
+ *       500:
+ *         description: Internal Server Error during revalidation.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error revalidating
+ *                 details:
+ *                   type: object
+ *   get:
+ *     summary: Test revalidation endpoint.
+ *     description: A GET endpoint to manually trigger revalidation for testing purposes. Requires a secret token and a path to revalidate.
+ *     parameters:
+ *       - in: query
+ *         name: secret
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: The secret token for authorization.
+ *       - in: query
+ *         name: path
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: The path to revalidate (e.g., '/alumni', '/berita/some-slug').
+ *     responses:
+ *       200:
+ *         description: Revalidation successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 revalidated:
+ *                   type: boolean
+ *                   example: true
+ *                 path:
+ *                   type: string
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized. Invalid or missing secret token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       400:
+ *         description: Path parameter is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Path required
+ *       500:
+ *         description: Internal Server Error during revalidation.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error revalidating
+ *                 details:
+ *                   type: object
+ */
 export async function POST(request: NextRequest) {
   try {
     // Verifikasi secret key

@@ -2,6 +2,111 @@ import { NextRequest, NextResponse } from 'next/server';
 import { client } from '@/sanity/client';
 import { groq } from 'next-sanity';
 
+/**
+ * @swagger
+ * /api/berita:
+ *   get:
+ *     summary: Get a list of news posts with pagination and filters.
+ *     description: Retrieve a paginated list of news posts, with optional filtering by search term, tag, and publication year.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 9
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term to filter news posts by title or excerpt.
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *         description: Filter news posts by a specific tag slug.
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: string
+ *         description: Filter news posts by publication year.
+ *     responses:
+ *       200:
+ *         description: A paginated list of news posts.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 news:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       subtitle:
+ *                         type: string
+ *                       slug:
+ *                         type: object
+ *                         properties:
+ *                           current:
+ *                             type: string
+ *                       publishedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       excerpt:
+ *                         type: string
+ *                       featured:
+ *                         type: boolean
+ *                       status:
+ *                         type: string
+ *                       mainImageUrl:
+ *                         type: string
+ *                       authorName:
+ *                         type: string
+ *                       authorImage:
+ *                         type: string
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     totalItems:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     currentPage:
+ *                       type: integer
+ *                     itemsPerPage:
+ *                       type: integer
+ *                     hasNextPage:
+ *                       type: boolean
+ *                     hasPrevPage:
+ *                       type: boolean
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

@@ -21,6 +21,80 @@ const sanityClient = createSanityClient({
   useCdn: false, // Don't use CDN for writing
 });
 
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     summary: Register a new user.
+ *     description: Registers a new user by creating an account in Supabase and an alumni profile in Sanity.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *               - batch
+ *               - major
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The user's email address.
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: The user's chosen password.
+ *               fullName:
+ *                 type: string
+ *                 description: The user's full name.
+ *               batch:
+ *                 type: integer
+ *                 description: The user's graduation batch/year.
+ *               major:
+ *                 type: string
+ *                 description: The user's major.
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User registered successfully
+ *                 userId:
+ *                   type: string
+ *                   description: The ID of the user in Supabase.
+ *                 sanityId:
+ *                   type: string
+ *                   description: The ID of the alumni document in Sanity.
+ *       400:
+ *         description: Missing required fields.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Missing required fields
+ *       500:
+ *         description: Internal Server Error or Supabase sign-up error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
 export async function POST(req: NextRequest) {
   try {
     const { email, password, fullName, batch, major } = await req.json();

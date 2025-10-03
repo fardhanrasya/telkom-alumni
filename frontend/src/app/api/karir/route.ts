@@ -1,6 +1,110 @@
 import { NextResponse } from 'next/server';
 import { client } from '@/sanity/client';
 
+/**
+ * @swagger
+ * /api/karir:
+ *   get:
+ *     summary: Get a list of job postings with pagination and filters.
+ *     description: Retrieve a paginated list of job postings, with optional filtering by search term, job type, and workplace type.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 8
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term to filter job postings by title, company name, or description.
+ *       - in: query
+ *         name: jobType
+ *         schema:
+ *           type: string
+ *           enum: [Semua, Full-time, Part-time, Contract, Freelance, Internship]
+ *           default: Semua
+ *         description: Filter job postings by job type.
+ *       - in: query
+ *         name: workplaceType
+ *         schema:
+ *           type: string
+ *           enum: [Semua, On-site, Remote, Hybrid]
+ *           default: Semua
+ *         description: Filter job postings by workplace type.
+ *     responses:
+ *       200:
+ *         description: A paginated list of job postings.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 jobs:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       slug:
+ *                         type: object
+ *                         properties:
+ *                           current:
+ *                             type: string
+ *                       publishedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       company:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                           logo:
+ *                             type: object
+ *                             properties:
+ *                               asset:
+ *                                 type: object
+ *                                 properties:
+ *                                   _ref:
+ *                                     type: string
+ *                       jobType:
+ *                         type: string
+ *                       workplaceType:
+ *                         type: string
+ *                       expiresAt:
+ *                         type: string
+ *                         format: date-time
+ *                       postedAt:
+ *                         type: string
+ *                         description: Human-readable time since the job was posted.
+ *                 totalItems:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *                 itemsPerPage:
+ *                   type: integer
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');

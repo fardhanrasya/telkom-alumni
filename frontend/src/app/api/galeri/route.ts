@@ -28,6 +28,228 @@ function createSortKey(
     .padStart(4, "0")}-${imageIndex.toString().padStart(3, "0")}`;
 }
 
+/**
+ * @swagger
+ * /api/galeri:
+ *   get:
+ *     summary: Retrieve gallery data based on specified action.
+ *     description: This endpoint provides various ways to fetch gallery-related data, including paginated images, paginated galleries, total counts, and last update timestamps.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination, applicable for 'images' and 'galleries' actions.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of items per page, applicable for 'images' and 'galleries' actions.
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter galleries or images by category.
+ *       - in: query
+ *         name: action
+ *         schema:
+ *           type: string
+ *           enum: [images, galleries, count, lastUpdate]
+ *           default: images
+ *         description: Specifies the type of data to retrieve.
+ *     responses:
+ *       200:
+ *         description: Successful response based on the 'action' parameter.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/GalleryImagesResponse'
+ *                 - $ref: '#/components/schemas/GalleryGalleriesResponse'
+ *                 - $ref: '#/components/schemas/GalleryCountResponse'
+ *                 - $ref: '#/components/schemas/GalleryLastUpdateResponse'
+ *       400:
+ *         description: Invalid action parameter.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Invalid action parameter
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Terjadi kesalahan saat mengambil data galeri
+ * components:
+ *   schemas:
+ *     GalleryImage:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique ID for the image.
+ *         image:
+ *           type: object
+ *           properties:
+ *             image:
+ *               type: object
+ *               properties:
+ *                 asset:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     url:
+ *                       type: string
+ *                     metadata:
+ *                       type: object
+ *                       properties:
+ *                         dimensions:
+ *                           type: object
+ *                           properties:
+ *                             width:
+ *                               type: integer
+ *                             height:
+ *                               type: integer
+ *             alt:
+ *               type: string
+ *             caption:
+ *               type: string
+ *         gallery:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             title:
+ *               type: string
+ *             slug:
+ *               type: object
+ *               properties:
+ *                 current:
+ *                   type: string
+ *             category:
+ *               type: string
+ *             publishedAt:
+ *               type: string
+ *               format: date-time
+ *             _createdAt:
+ *               type: string
+ *               format: date-time
+ *         sortKey:
+ *           type: string
+ *     GalleryImagesResponse:
+ *       type: object
+ *       properties:
+ *         images:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/GalleryImage'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             totalImages:
+ *               type: integer
+ *             currentPage:
+ *               type: integer
+ *             itemsPerPage:
+ *               type: integer
+ *             hasMore:
+ *               type: boolean
+ *     GalleryItem:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         slug:
+ *           type: object
+ *           properties:
+ *             current:
+ *               type: string
+ *         description:
+ *           type: string
+ *         category:
+ *           type: string
+ *         publishedAt:
+ *           type: string
+ *           format: date-time
+ *         featured:
+ *           type: boolean
+ *         _updatedAt:
+ *           type: string
+ *           format: date-time
+ *         _createdAt:
+ *           type: string
+ *           format: date-time
+ *         images:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: object
+ *                 properties:
+ *                   asset:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                       metadata:
+ *                         type: object
+ *                         properties:
+ *                           dimensions:
+ *                             type: object
+ *                             properties:
+ *                               width:
+ *                                 type: integer
+ *                               height:
+ *                                 type: integer
+ *               alt:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *     GalleryGalleriesResponse:
+ *       type: object
+ *       properties:
+ *         galleries:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/GalleryItem'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             totalItems:
+ *               type: integer
+ *             currentPage:
+ *               type: integer
+ *             itemsPerPage:
+ *               type: integer
+ *             hasMore:
+ *               type: boolean
+ *     GalleryCountResponse:
+ *       type: object
+ *       properties:
+ *         count:
+ *           type: integer
+ *     GalleryLastUpdateResponse:
+ *       type: object
+ *       properties:
+ *         lastUpdate:
+ *           type: integer
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

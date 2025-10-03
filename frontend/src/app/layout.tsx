@@ -59,14 +59,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body
-        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}
-      >
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <Analytics />
-        <SpeedInsights />
+      <body className={`${inter.variable} font-sans antialiased`}>
+        {children}
       </body>
     </html>
   );

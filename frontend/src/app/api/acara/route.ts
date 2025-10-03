@@ -2,6 +2,93 @@ import { NextResponse } from 'next/server';
 import { client } from '@/sanity/client';
 import { getAllEventsQuery } from '@/sanity/queries/eventQueries';
 
+/**
+ * @swagger
+ * /api/acara:
+ *   get:
+ *     summary: Get a list of events with pagination and filters.
+ *     description: Retrieve a paginated list of events, with optional filtering by search term and event type (online/offline).
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 6
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term to filter events by title, description, or location.
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [all, online, offline]
+ *           default: all
+ *         description: Filter events by type (online or offline). Use 'all' for all event types.
+ *     responses:
+ *       200:
+ *         description: A paginated list of events.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       slug:
+ *                         type: object
+ *                         properties:
+ *                           current:
+ *                             type: string
+ *                       startDate:
+ *                         type: string
+ *                         format: date-time
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                       location:
+ *                         type: string
+ *                       isVirtual:
+ *                         type: boolean
+ *                       virtualLink:
+ *                         type: string
+ *                       imageUrl:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                 totalItems:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *                 itemsPerPage:
+ *                   type: integer
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');
