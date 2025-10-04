@@ -37,7 +37,7 @@ const sanityClient = createSanityClient({
  *               - email
  *               - password
  *               - fullName
- *               - batch
+ *               - yearGraduated
  *               - major
  *             properties:
  *               email:
@@ -51,9 +51,9 @@ const sanityClient = createSanityClient({
  *               fullName:
  *                 type: string
  *                 description: The user's full name.
- *               batch:
+ *               yearGraduated:
  *                 type: integer
- *                 description: The user's graduation batch/year.
+ *                 description: The user's graduation year.
  *               major:
  *                 type: string
  *                 description: The user's major.
@@ -97,10 +97,19 @@ const sanityClient = createSanityClient({
  */
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, fullName, batch, major } = await req.json();
+    const { email, password, fullName, yearGraduated, major } = await req.json();
 
-    if (!email || !password || !fullName || !batch || !major) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (
+      !email ||
+      !password ||
+      !fullName ||
+      yearGraduated === undefined ||
+      !major
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     // 1. Sign up user in Supabase
@@ -114,16 +123,19 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Create alumni profile in Sanity
-    const slug = fullName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '');
+    const slug = fullName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-*|-*$/g, "");
 
     const alumniDoc = {
-      _type: 'alumni',
+      _type: "alumni",
       fullName,
       slug: {
-        _type: 'slug',
+        _type: "slug",
         current: slug,
       },
-      batch,
+      yearGraduated,
       major,
       email,
       isVerified: false, // Default to false, can be verified later in Sanity Studio
@@ -131,10 +143,19 @@ export async function POST(req: NextRequest) {
 
     const { _id: sanityId } = await sanityClient.create(alumniDoc);
 
-    return NextResponse.json({ message: 'User registered successfully', userId: user?.user?.id, sanityId }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        message: "User registered successfully",
+        userId: user?.user?.id,
+        sanityId,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
-    console.error('Sign-up API error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error("Sign-up API error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }
