@@ -104,6 +104,21 @@ type AlumniDetailPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+// Generate static params untuk ISR
+export async function generateStaticParams() {
+  try {
+    const alumni = await client.fetch(
+      `*[_type == "alumni" && !(_id in path("drafts.**"))] { slug }`
+    );
+    return alumni.map((item: any) => ({
+      slug: item.slug.current,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for alumni:", error);
+    return [];
+  }
+}
+
 // Helper function to extract text from bio
 function getBioText(bio: any): string {
   if (!bio) return "";
