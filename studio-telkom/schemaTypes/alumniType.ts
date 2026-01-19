@@ -32,8 +32,8 @@ export const alumniType = defineType({
         list: [
           {title: 'Rekayasa Perangkat Lunak', value: 'rpl'},
           {title: 'Teknik Komputer dan Jaringan', value: 'tkj'},
-          {title: 'Multimedia', value: 'mm'},
-          {title: 'Teknik Elektronika Industri', value: 'tei'},
+          {title: 'Teknik Jaringan Akses Telekomunikasi', value: 'tja'},
+          {title: 'Teknik Transmisi Telekomunikasi', value: 'tr'},
         ],
       },
       validation: (rule) => rule.required(),
