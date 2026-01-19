@@ -1,48 +1,53 @@
-import { NextResponse } from 'next/server';
-import { client } from '@/sanity/client';
-import { getAllEventsQuery } from '@/sanity/queries/eventQueries';
+import { NextResponse } from "next/server";
+import { client } from "@/sanity/client";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '6');
-  const searchTerm = searchParams.get('search') || '';
-  const type = searchParams.get('type') || 'all'; // 'all', 'online', 'offline'
-  
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "6");
+  const searchTerm = searchParams.get("search") || "";
+  const type = searchParams.get("type") || "all"; // 'all', 'online', 'offline'
+
   try {
     // Buat filter conditions
     let filterConditions = [];
-    
+
+    // Filter untuk hanya menampilkan acara yang belum berakhir
+    // Jika ada endDate, gunakan endDate, jika tidak ada gunakan startDate
+    filterConditions.push(`(
+      (defined(endDate) && endDate >= now()) || 
+      (!defined(endDate) && startDate >= now())
+    )`);
+
     // Filter berdasarkan tipe acara (online/offline)
-    if (type && type !== 'all') {
-      if (type === 'online') {
+    if (type && type !== "all") {
+      if (type === "online") {
         filterConditions.push(`isVirtual == true`);
-      } else if (type === 'offline') {
+      } else if (type === "offline") {
         filterConditions.push(`isVirtual == false`);
       }
     }
-    
+
     // Filter berdasarkan pencarian
-    if (searchTerm && searchTerm.trim() !== '') {
+    if (searchTerm && searchTerm.trim() !== "") {
       filterConditions.push(
         `(title match "*${searchTerm}*" || 
           coalesce(description, "") match "*${searchTerm}*" || 
           coalesce(location, "") match "*${searchTerm}*")`
       );
     }
-    
+
     // Membuat filter query
-    const filterQuery = filterConditions.length > 0 
-      ? ` && ${filterConditions.join(' && ')}` 
-      : '';
-    
+    const filterQuery =
+      filterConditions.length > 0 ? ` && ${filterConditions.join(" && ")}` : "";
+
     // Buat query untuk menghitung total
     const countQuery = `count(*[
       _type == "event"
       && defined(slug.current)
       ${filterQuery}
     ])`;
-    
+
     // Buat query untuk mengambil data dengan pagination
     const eventsQuery = `*[
       _type == "event"
@@ -60,27 +65,27 @@ export async function GET(request: Request) {
       "imageUrl": image.asset->url,
       description
     }`;
-    
+
     // Ambil data dan total items
     const [events, totalItems] = await Promise.all([
       client.fetch(eventsQuery),
-      client.fetch(countQuery)
+      client.fetch(countQuery),
     ]);
-    
+
     // Hitung total halaman
     const totalPages = Math.ceil(totalItems / limit);
-    
-    return NextResponse.json({ 
-      events, 
-      totalItems, 
+
+    return NextResponse.json({
+      events,
+      totalItems,
       totalPages,
       currentPage: page,
-      itemsPerPage: limit
+      itemsPerPage: limit,
     });
   } catch (error) {
-    console.error('Error mengambil data acara:', error);
+    console.error("Error mengambil data acara:", error);
     return NextResponse.json(
-      { error: 'Terjadi kesalahan saat mengambil data acara' },
+      { error: "Terjadi kesalahan saat mengambil data acara" },
       { status: 500 }
     );
   }
