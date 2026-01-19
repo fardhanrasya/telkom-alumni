@@ -38,7 +38,7 @@ export default function AlumniContent() {
   const [alumni, setAlumni] = useState<Alumni[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(
-    pageParam ? parseInt(pageParam) : 1
+    pageParam ? parseInt(pageParam) : 1,
   );
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -66,7 +66,7 @@ export default function AlumniContent() {
   // Function to fetch alumni data using local API route
   const fetchAlumni = async (
     page: number,
-    filters: { searchTerm?: string; major?: string; yearRange?: string }
+    filters: { searchTerm?: string; major?: string; yearRange?: string },
   ) => {
     setLoading(true);
     try {
@@ -234,7 +234,7 @@ export default function AlumniContent() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70" />
         <div className="relative flex h-full flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-            Direktori Alumni
+            Direktori Alumni SMK Telkom Jakarta
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-white/90 md:text-xl">
             Temukan dan terhubung dengan alumni SMK Telkom Jakarta dari berbagai
