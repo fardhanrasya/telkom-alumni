@@ -11,13 +11,16 @@ interface JobsSectionProps {
   jobs: SanityDocument[];
 }
 
-// Map kode tipe pekerjaan ke nama lengkap
 const jobTypeMap: Record<string, string> = {
   fullTime: 'Full-time',
   partTime: 'Part-time',
   contract: 'Kontrak',
   freelance: 'Freelance',
   internship: 'Magang',
+  'full-time': 'Full-time',
+  'part-time': 'Part-time',
+  contractual: 'Kontrak',
+  magang: 'Magang',
 };
 
 // Format tanggal publikasi relatif
@@ -66,16 +69,18 @@ const JobsSection: React.FC<JobsSectionProps> = ({ jobs }) => {
                 <div className="group overflow-hidden rounded-lg bg-white p-6 shadow-md transition-all hover:shadow-lg">
                   <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center">
-                      <div className="relative h-12 w-12 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center">
-                        {job.company?.logo ? (
+                      <div className="relative h-12 w-12 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center font-bold text-lg text-primary shadow-inner">
+                        {typeof job.company !== 'string' && job.company?.logo ? (
                           <Image
                             src={urlFor(job.company.logo)?.url() || ''}
-                            alt={job.company.name}
+                            alt={typeof job.company === 'string' ? job.company : job.company?.name || ''}
                             className="object-contain"
                             fill
                           />
                         ) : (
-                          <span className="text-xs text-gray-500 text-center">{job.company?.name?.charAt(0) || 'C'}</span>
+                          <span className="text-center">
+                            {(typeof job.company === 'string' ? job.company : job.company?.name || 'C').charAt(0)}
+                          </span>
                         )}
                       </div>
                       <div className="ml-4">
@@ -84,13 +89,13 @@ const JobsSection: React.FC<JobsSectionProps> = ({ jobs }) => {
                         </h3>
                         <div className="mt-1 flex items-center">
                           <span className="text-sm font-medium text-gray-700">
-                            {job.company?.name}
+                            {typeof job.company === 'string' ? job.company : job.company?.name}
                           </span>
-                          {job.company?.location && (
+                          {(typeof job.company === 'string' ? job.location : job.company?.location) && (
                             <>
                               <span className="mx-2 text-gray-400">•</span>
                               <span className="text-sm text-gray-600">
-                                {job.company.location}
+                                {typeof job.company === 'string' ? job.location : job.company?.location}
                               </span>
                             </>
                           )}
