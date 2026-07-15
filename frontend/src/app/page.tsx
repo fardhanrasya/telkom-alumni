@@ -42,25 +42,36 @@ export default async function IndexPage() {
   let jobs: any[] = [];
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fardhanserver.tail824e9e.ts.net';
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY || '73a44133b499434ce8c239962fccdc2211dba0a63575dd758e39026cfde0d5ab';
-    const res = await fetch(`${apiUrl}/jobs/search?per_page=3`, {
-      headers: {
-        'X-API-Key': apiKey,
-        'Accept': 'application/json',
-      },
-      next: { revalidate: 30 }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      jobs = (data.hits || []).map((hit: any) => ({
-        _id: hit.id,
-        title: hit.title,
-        company: hit.company,
-        location: hit.location || '',
-        slug: { current: hit.id },
-        jobType: hit.job_type,
-        publishedAt: hit.posted_at ? new Date(hit.posted_at * 1000).toISOString() : new Date().toISOString(),
-      }));
+    const apiKey = process.env.KARIR_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
+    if (apiKey) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      
+      const res = await fetch(`${apiUrl}/jobs/search?per_page=3`, {
+        headers: {
+          'X-API-Key': apiKey,
+          'Accept': 'application/json',
+        },
+        next: { revalidate: 30 },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (res.ok) {
+        const data = await res.json();
+        jobs = (data.hits || []).map((hit: any) => ({
+          _id: hit.id,
+          title: hit.title,
+          company: hit.company || '',
+          location: hit.location || '',
+          slug: { current: hit.id },
+          jobType: hit.job_type,
+          publishedAt: hit.posted_at ? new Date(hit.posted_at * 1000).toISOString() : new Date().toISOString(),
+        }));
+      }
+    } else {
+      console.warn('API Key is not configured for homepage jobs listing');
     }
   } catch (err) {
     console.error('Error fetching recent jobs from API:', err);

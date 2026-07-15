@@ -21,6 +21,7 @@ interface Job {
   fresh_graduate_friendly?: boolean;
   is_internship?: boolean;
   job_type: string;
+  jobType?: string;
   description_summary?: string;
   raw_requirements?: string;
   postedAt: string;
@@ -198,7 +199,6 @@ const KarirContent = () => {
   const handleApplyFilters = () => {
     setCurrentPage(1);
     updateURL(1, searchTerm, selectedJobType, selectedLocation);
-    fetchJobs(1, { search: searchTerm, jobType: selectedJobType, location: selectedLocation });
   };
 
   const handleResetFilters = () => {
@@ -207,13 +207,11 @@ const KarirContent = () => {
     setSelectedLocation('');
     setCurrentPage(1);
     router.replace('/karir', { scroll: false });
-    fetchJobs(1, {});
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     updateURL(page, searchTerm, selectedJobType, selectedLocation);
-    fetchJobs(page, { search: searchTerm, jobType: selectedJobType, location: selectedLocation });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

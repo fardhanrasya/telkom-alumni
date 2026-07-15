@@ -9,7 +9,14 @@ export async function GET(request: Request) {
   const location = searchParams.get('location') || '';
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fardhanserver.tail824e9e.ts.net';
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY || '73a44133b499434ce8c239962fccdc2211dba0a63575dd758e39026cfde0d5ab';
+  const apiKey = process.env.KARIR_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'API Key is not configured on the server.' },
+      { status: 500 }
+    );
+  }
 
   try {
     const queryParams = new URLSearchParams();
@@ -34,16 +41,26 @@ export async function GET(request: Request) {
       queryParams.append('location', location);
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch(`${apiUrl}/jobs/search?${queryParams.toString()}`, {
       headers: {
         'X-API-Key': apiKey,
         'Accept': 'application/json',
       },
-      next: { revalidate: 60 } // Cache for 60 seconds
+      next: { revalidate: 60 }, // Cache for 60 seconds
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`External API responded with status ${response.status}`);
+      const errBody = await response.json().catch(() => null);
+      return NextResponse.json(
+        { error: errBody?.message || errBody?.error || `Gagal memproses request (status ${response.status}).` },
+        { status: response.status >= 500 ? 502 : response.status }
+      );
     }
 
     const data = await response.json();
@@ -81,7 +98,7 @@ export async function GET(request: Request) {
       return {
         id: hit.id,
         title: hit.title,
-        company: hit.company,
+        company: hit.company || '',
         location: hit.location || '',
         salary_min: hit.salary_min,
         salary_max: hit.salary_max,
@@ -101,7 +118,7 @@ export async function GET(request: Request) {
     });
 
     const totalItems = data.found || 0;
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = limit > 0 ? Math.ceil(totalItems / limit) : 1;
 
     return NextResponse.json({
       jobs,

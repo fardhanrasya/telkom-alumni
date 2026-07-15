@@ -113,7 +113,14 @@ async function getJobDetail(slug: string): Promise<JobDetail | null> {
   }
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fardhanserver.tail824e9e.ts.net';
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY || '73a44133b499434ce8c239962fccdc2211dba0a63575dd758e39026cfde0d5ab';
+  const apiKey = process.env.KARIR_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('API Key is not configured on the server.');
+  }
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   
   try {
     const response = await fetch(`${apiUrl}/jobs/${slug}`, {
@@ -121,8 +128,11 @@ async function getJobDetail(slug: string): Promise<JobDetail | null> {
         'X-API-Key': apiKey,
         'Accept': 'application/json',
       },
-      next: { revalidate: 60 }
+      next: { revalidate: 60 },
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       if (response.status === 404) return null;
@@ -145,7 +155,8 @@ async function getJobDetail(slug: string): Promise<JobDetail | null> {
       _id: jobData.id,
       title: jobData.title,
       slug: { current: jobData.id },
-      company: jobData.company, // string
+      company: jobData.company || '', // string
+      location: jobData.location || '', // mapping location field
       publishedAt: jobData.posted_at ? new Date(jobData.posted_at * 1000).toISOString() : new Date().toISOString(),
       jobType: jobData.job_type === 'full-time' ? 'Full-time' : jobData.job_type === 'internship' ? 'Internship' : jobData.job_type === 'part-time' ? 'Part-time' : jobData.job_type === 'contract' ? 'Contract' : jobData.job_type === 'freelance' ? 'Freelance' : jobData.job_type,
       workplaceType: workplaceType,
@@ -165,8 +176,9 @@ async function getJobDetail(slug: string): Promise<JobDetail | null> {
       fresh_graduate_friendly: jobData.fresh_graduate_friendly,
     };
   } catch (error) {
+    clearTimeout(timeoutId);
     console.error('Error fetching job from external API:', error);
-    return null;
+    throw error;
   }
 }
 

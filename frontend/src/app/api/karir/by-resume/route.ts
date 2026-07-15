@@ -4,9 +4,18 @@ export async function POST(request: Request) {
   try {
     const contentType = request.headers.get('content-type') || '';
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fardhanserver.tail824e9e.ts.net';
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY || '73a44133b499434ce8c239962fccdc2211dba0a63575dd758e39026cfde0d5ab';
+    const apiKey = process.env.KARIR_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
     
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'API Key is not configured on the server.' },
+        { status: 500 }
+      );
+    }
+
     let response;
+    let page = 1;
+    let per_page = 8;
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
@@ -22,15 +31,20 @@ export async function POST(request: Request) {
         extFormData.append('location', location);
       }
       
-      const page = formData.get('page');
-      if (page) {
-        extFormData.append('page', page);
+      const pageVal = formData.get('page');
+      if (pageVal) {
+        page = parseInt(pageVal.toString()) || 1;
+        extFormData.append('page', pageVal);
       }
       
-      const per_page = formData.get('per_page');
-      if (per_page) {
-        extFormData.append('per_page', per_page);
+      const perPageVal = formData.get('per_page');
+      if (perPageVal) {
+        per_page = parseInt(perPageVal.toString()) || 8;
+        extFormData.append('per_page', perPageVal);
       }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds for large files
 
       response = await fetch(`${apiUrl}/jobs/search/by-resume`, {
         method: 'POST',
@@ -39,10 +53,15 @@ export async function POST(request: Request) {
           'Accept': 'application/json',
         },
         body: extFormData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
     } else {
       const body = await request.json();
-      const { text, location, page = 1, per_page = 8 } = body;
+      const { text, location, page: bodyPage = 1, per_page: bodyPerPage = 8 } = body;
+      page = bodyPage;
+      per_page = bodyPerPage;
 
       if (!text || text.trim().length < 20) {
         return NextResponse.json(
@@ -50,6 +69,9 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       response = await fetch(`${apiUrl}/jobs/search/by-resume`, {
         method: 'POST',
@@ -64,11 +86,18 @@ export async function POST(request: Request) {
           page,
           per_page,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
     }
 
     if (!response.ok) {
-      throw new Error(`External API responded with status ${response.status}`);
+      const errBody = await response.json().catch(() => null);
+      return NextResponse.json(
+        { error: errBody?.message || errBody?.error || `Gagal memproses resume (status ${response.status}).` },
+        { status: response.status >= 500 ? 502 : response.status }
+      );
     }
 
     const data = await response.json();
@@ -124,7 +153,7 @@ export async function POST(request: Request) {
       return {
         id: hit.id,
         title: hit.title,
-        company: hit.company,
+        company: hit.company || '',
         location: hit.location || '',
         salary_min: hit.salary_min,
         salary_max: hit.salary_max,
