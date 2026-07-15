@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils';
 import { urlFor } from '@/sanity/utils';
 import Link from 'next/link';
+import SocialShareButtons from '@/components/SocialShareButtons';
 
 // Simple SVGs for icons to prevent dependency resolution issues during build,
 // or we can import from react-icons/fi. Let's use clean SVG icons for bulletproof compile.
@@ -200,6 +201,8 @@ export default async function JobDetailPage({ params }: Props) {
   }
 
   const companyName = typeof job.company === 'string' ? job.company : job.company.name;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://telkom-alumni.vercel.app";
+  const currentUrl = `${baseUrl}/karir/${resolvedParams.slug}`;
   
   return (
     <div className="bg-zinc-50 min-h-screen py-10 md:py-16">
@@ -325,6 +328,12 @@ export default async function JobDetailPage({ params }: Props) {
                   </div>
                 </div>
               )}
+
+              <SocialShareButtons
+                title={job.title}
+                url={currentUrl}
+                description={typeof job.description === 'string' ? job.description.substring(0, 150) : `Lowongan pekerjaan ${job.title} di ${companyName}`}
+              />
             </div>
           </div>
           
