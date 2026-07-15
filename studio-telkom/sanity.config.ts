@@ -7,8 +7,8 @@ export default defineConfig({
   name: 'default',
   title: 'Telkom',
 
-  projectId: '1btnolup',
-  dataset: 'dev',
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID!,
+  dataset: process.env.SANITY_STUDIO_DATASET!,
 
   plugins: [structureTool(), visionTool()],
 

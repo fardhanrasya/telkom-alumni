@@ -50,14 +50,14 @@ export const alumniType = defineType({
       name: 'email',
       title: 'Email',
       type: 'string',
-      validation: (rule) => 
+      validation: (rule) =>
         rule.regex(
           /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
           {
             name: 'email',
             invert: false,
-          }
-        )
+          },
+        ),
     }),
     defineField({
       name: 'socialMedia',
@@ -99,6 +99,12 @@ export const alumniType = defineType({
           ],
         },
       ],
+    }),
+    defineField({
+      name: 'agreement',
+      title: 'Persetujuan Tampil',
+      type: 'boolean',
+      validation: (rule) => rule.required(),
     }),
   ],
   preview: {

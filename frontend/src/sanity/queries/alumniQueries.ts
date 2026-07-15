@@ -6,6 +6,7 @@
 export const getAllAlumniQuery = `*[
   _type == "alumni"
   && defined(slug.current)
+  && agreement == true
 ]|order(yearGraduated desc){
   _id, 
   name, 
@@ -13,13 +14,15 @@ export const getAllAlumniQuery = `*[
   yearGraduated,
   major,
   "profileImageUrl": profileImage.asset->url,
-  currentJob
+  currentJob,
+  agreement
 }`;
 
 // Query untuk mendapatkan alumni terkemuka/featured
 export const getFeaturedAlumniQuery = (limit: number = 4) => `*[
   _type == "alumni"
   && defined(slug.current)
+  && agreement == true
 ]|order(yearGraduated desc)[0...${limit}]{
   _id, 
   name, 
@@ -27,13 +30,15 @@ export const getFeaturedAlumniQuery = (limit: number = 4) => `*[
   yearGraduated,
   major,
   "profileImageUrl": profileImage.asset->url,
-  currentJob
+  currentJob,
+  agreement
 }`;
 
 // Query untuk mendapatkan detail alumni berdasarkan slug
 export const getAlumniBySlugQuery = `*[
   _type == "alumni" 
   && slug.current == $slug
+  && agreement == true
 ][0]{
   _id,
   name,
@@ -45,5 +50,6 @@ export const getAlumniBySlugQuery = `*[
   socialMedia,
   currentJob,
   bio,
-  achievements
+  achievements,
+  agreement
 }`;
