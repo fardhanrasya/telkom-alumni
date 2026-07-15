@@ -1,172 +1,136 @@
-import { NextResponse } from "next/server";
-import { client } from "@/sanity/client";
+import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "8");
-  const searchTerm = searchParams.get("search") || "";
-  const jobType = searchParams.get("jobType") || "Semua";
-  const workplaceType = searchParams.get("workplaceType") || "Semua";
-  const tag = searchParams.get("tag") || "Semua";
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '8');
+  const searchTerm = searchParams.get('search') || '';
+  const jobType = searchParams.get('jobType') || 'Semua';
+  const location = searchParams.get('location') || '';
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fardhanserver.tail824e9e.ts.net';
+  const apiKey = process.env.KARIR_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'API Key is not configured on the server.' },
+      { status: 500 }
+    );
+  }
 
   try {
-    // Buat filter conditions
-    let filterConditions = [];
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('per_page', limit.toString());
 
-    // Filter berdasarkan jenis pekerjaan
-    if (jobType && jobType !== "Semua") {
-      // Konversi format filter ke format yang sesuai dengan skema Sanity
-      let sanityJobType = "";
-      switch (jobType) {
-        case "Full-time":
-          sanityJobType = "fullTime";
-          break;
-        case "Part-time":
-          sanityJobType = "partTime";
-          break;
-        case "Contract":
-          sanityJobType = "contract";
-          break;
-        case "Freelance":
-          sanityJobType = "freelance";
-          break;
-        case "Internship":
-          sanityJobType = "internship";
-          break;
-        default:
-          sanityJobType = jobType;
+    let finalSearchTerm = searchTerm || '';
+    if (jobType && jobType !== 'Semua') {
+      const apiJobType = jobType.toLowerCase();
+      if (apiJobType === 'freelance') {
+        finalSearchTerm = finalSearchTerm ? `${finalSearchTerm} freelance` : 'freelance';
+      } else {
+        queryParams.append('job_type', apiJobType);
       }
-      filterConditions.push(`jobType == "${sanityJobType}"`);
     }
 
-    // Filter berdasarkan tipe tempat kerja
-    if (workplaceType && workplaceType !== "Semua") {
-      // Konversi format filter ke format yang sesuai dengan skema Sanity
-      let sanityWorkplaceType = "";
-      switch (workplaceType) {
-        case "On-site":
-          sanityWorkplaceType = "onsite";
-          break;
-        case "Remote":
-          sanityWorkplaceType = "remote";
-          break;
-        case "Hybrid":
-          sanityWorkplaceType = "hybrid";
-          break;
-        default:
-          sanityWorkplaceType = workplaceType;
-      }
-      filterConditions.push(`workplaceType == "${sanityWorkplaceType}"`);
+    if (finalSearchTerm && finalSearchTerm.trim() !== '') {
+      queryParams.append('q', finalSearchTerm);
     }
 
-    if (tag && tag !== "Semua") {
-      let sanityTag = "";
-      switch (tag) {
-        case "Rekayasa Perangkat Lunak":
-          sanityTag = "Rekayasa Perangkat Lunak";
-          break;
-        case "Teknik Komputer Jaringan":
-          sanityTag = "Teknik Komputer Jaringan";
-          break;
-        case "Teknik Jaringan Akses":
-          sanityTag = "Teknik Jaringan Akses";
-          break;
-        case "Transmisi":
-          sanityTag = "Transmisi";
-          break;
-        default:
-          sanityTag = tag;
-      }
-      filterConditions.push(`tag == "${sanityTag}"`);
+    if (location && location.trim() !== '') {
+      queryParams.append('location', location);
     }
 
-    // Filter berdasarkan pencarian
-    if (searchTerm && searchTerm.trim() !== "") {
-      filterConditions.push(
-        `(title match "*${searchTerm}*" || 
-          company.name match "*${searchTerm}*" || 
-          coalesce(description, "") match "*${searchTerm}*")`
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(`${apiUrl}/jobs/search?${queryParams.toString()}`, {
+      headers: {
+        'X-API-Key': apiKey,
+        'Accept': 'application/json',
+      },
+      next: { revalidate: 60 }, // Cache for 60 seconds
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => null);
+      return NextResponse.json(
+        { error: errBody?.message || errBody?.error || `Gagal memproses request (status ${response.status}).` },
+        { status: response.status >= 500 ? 502 : response.status }
       );
     }
 
-    // Membuat filter query
-    const filterQuery =
-      filterConditions.length > 0 ? ` && ${filterConditions.join(" && ")}` : "";
-
-    // Buat query untuk menghitung total
-    const countQuery = `count(*[
-      _type == "jobPosting"
-      && defined(slug.current)
-      ${filterQuery}
-    ])`;
-
-    // Buat query untuk mengambil data dengan pagination
-    const jobsQuery = `*[
-      _type == "jobPosting"
-      && defined(slug.current)
-      ${filterQuery}
-    ]|order(publishedAt desc)[${(page - 1) * limit}...${page * limit}]{
-      _id, 
-      title, 
-      slug,
-      publishedAt,
-      company,
-      jobType,
-      workplaceType,
-      tag,
-      expiresAt
-    }`;
-
-    // Ambil data dan total items
-    const [jobs, totalItems] = await Promise.all([
-      client.fetch(jobsQuery),
-      client.fetch(countQuery),
-    ]);
-
-    // Format tanggal untuk publishedAt dan expiresAt
-    const formattedJobs = jobs.map((job: any) => {
-      // Hitung berapa lama sejak lowongan dipublikasikan
-      const publishedDate = new Date(job.publishedAt);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - publishedDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      let postedAt = "";
-      if (diffDays === 0) {
-        postedAt = "Hari ini";
-      } else if (diffDays === 1) {
-        postedAt = "Kemarin";
-      } else if (diffDays < 7) {
-        postedAt = `${diffDays} hari yang lalu`;
-      } else if (diffDays < 30) {
-        const weeks = Math.floor(diffDays / 7);
-        postedAt = `${weeks} minggu yang lalu`;
-      } else {
-        const months = Math.floor(diffDays / 30);
-        postedAt = `${months} bulan yang lalu`;
+    const data = await response.json();
+    
+    // Map hits to UI format
+    const jobs = (data.hits || []).map((hit: any) => {
+      // Calculate human-readable posted time
+      let postedAt = 'Baru saja';
+      if (hit.posted_at) {
+        const postedDate = new Date(hit.posted_at * 1000); // Unix timestamp is in seconds
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - postedDate.getTime());
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+          if (diffHours === 0) {
+            postedAt = 'Baru saja';
+          } else {
+            postedAt = `${diffHours} jam yang lalu`;
+          }
+        } else if (diffDays === 1) {
+          postedAt = 'Kemarin';
+        } else if (diffDays < 7) {
+          postedAt = `${diffDays} hari yang lalu`;
+        } else if (diffDays < 30) {
+          const weeks = Math.floor(diffDays / 7);
+          postedAt = `${weeks} minggu yang lalu`;
+        } else {
+          const months = Math.floor(diffDays / 30);
+          postedAt = `${months} bulan yang lalu`;
+        }
       }
 
       return {
-        ...job,
+        id: hit.id,
+        title: hit.title,
+        company: hit.company || '',
+        location: hit.location || '',
+        salary_min: hit.salary_min,
+        salary_max: hit.salary_max,
+        education_level: hit.education_level || '',
+        education_is_mandatory: hit.education_is_mandatory,
+        min_experience_years: hit.min_experience_years,
+        experience_is_mandatory: hit.experience_is_mandatory,
+        fresh_graduate_friendly: hit.fresh_graduate_friendly,
+        is_internship: hit.is_internship,
+        job_type: hit.job_type,
+        jobType: hit.job_type,
+        slug: { current: hit.id },
+        description_summary: hit.description_summary,
+        raw_requirements: hit.raw_requirements,
         postedAt,
       };
     });
 
-    // Hitung total halaman
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalItems = data.found || 0;
+    const totalPages = limit > 0 ? Math.ceil(totalItems / limit) : 1;
 
     return NextResponse.json({
-      jobs: formattedJobs,
+      jobs,
       totalItems,
       totalPages,
       currentPage: page,
-      itemsPerPage: limit,
+      itemsPerPage: limit
     });
   } catch (error) {
-    console.error("Error mengambil data lowongan kerja:", error);
+    console.error('Error fetching jobs in local proxy API:', error);
     return NextResponse.json(
-      { error: "Terjadi kesalahan saat mengambil data lowongan kerja" },
+      { error: 'Gagal memuat lowongan kerja. Silakan coba beberapa saat lagi.' },
       { status: 500 }
     );
   }
